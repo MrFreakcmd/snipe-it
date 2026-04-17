@@ -185,7 +185,7 @@ trait Searchable
 
         foreach ($filters as $filterKey => $filterValue) {
             if (in_array($filterKey, $searchableAttributes, true)) {
-                if (!$this->canApplyStructuredFilterToAttribute($filterKey)) {
+                if (! $this->canApplyStructuredFilterToAttribute($filterKey)) {
                     $blockedAttributeFilterCount++;
 
                     continue;
@@ -430,7 +430,7 @@ trait Searchable
         $firstConditionAdded = false;
 
         foreach ($this->getSearchableAttributes() as $column) {
-            if (!$this->canApplyStructuredFilterToAttribute($column)) {
+            if (! $this->canApplyStructuredFilterToAttribute($column)) {
                 continue;
             }
 
