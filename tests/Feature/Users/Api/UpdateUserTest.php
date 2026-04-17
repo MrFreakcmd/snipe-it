@@ -347,6 +347,32 @@ class UpdateUserTest extends TestCase
 
     }
 
+    public function test_manage_contact_info_without_auth_field_access_cannot_change_admin_email()
+    {
+        $editingUser = User::factory()->editUsers()->manageContactInfo()->create();
+        $adminUser = User::factory()->admin()->create(['email' => 'admin@example.org']);
+
+        $this->actingAsForApi($editingUser)
+            ->patch(route('api.users.update', $adminUser), [
+                'email' => 'hijack-admin@example.org',
+            ]);
+
+        $this->assertSame('admin@example.org', $adminUser->refresh()->email);
+    }
+
+    public function test_manage_contact_info_without_auth_field_access_cannot_change_superadmin_email()
+    {
+        $editingUser = User::factory()->editUsers()->manageContactInfo()->create();
+        $superuser = User::factory()->superuser()->create(['email' => 'superuser@example.org']);
+
+        $this->actingAsForApi($editingUser)
+            ->patch(route('api.users.update', $superuser), [
+                'email' => 'hijack-superuser@example.org',
+            ]);
+
+        $this->assertSame('superuser@example.org', $superuser->refresh()->email);
+    }
+
     public function test_users_scoped_to_company_during_update_when_multiple_full_company_support_enabled()
     {
         $this->settings->enableMultipleFullCompanySupport();

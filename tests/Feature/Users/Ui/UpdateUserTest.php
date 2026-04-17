@@ -178,6 +178,36 @@ class UpdateUserTest extends TestCase
         $this->assertNotTrue(Hash::check('super-secret-new-password', $superuser->password), $superuser->refresh()->password);
     }
 
+    public function test_manage_contact_info_without_auth_field_access_cannot_change_admin_email()
+    {
+        $editingUser = User::factory()->editUsers()->manageContactInfo()->create(['activated' => true]);
+        $admin = User::factory()->admin()->create(['email' => 'admin@example.org', 'activated' => true]);
+
+        $this->actingAs($editingUser)
+            ->put(route('users.update', $admin), [
+                'first_name' => $admin->first_name,
+                'last_name' => $admin->last_name,
+                'email' => 'hijack-admin@example.org',
+            ]);
+
+        $this->assertSame('admin@example.org', $admin->refresh()->email);
+    }
+
+    public function test_manage_contact_info_without_auth_field_access_cannot_change_superadmin_email()
+    {
+        $editingUser = User::factory()->editUsers()->manageContactInfo()->create(['activated' => true]);
+        $superuser = User::factory()->superuser()->create(['email' => 'superuser@example.org', 'activated' => true]);
+
+        $this->actingAs($editingUser)
+            ->put(route('users.update', $superuser), [
+                'first_name' => $superuser->first_name,
+                'last_name' => $superuser->last_name,
+                'email' => 'hijack-superuser@example.org',
+            ]);
+
+        $this->assertSame('superuser@example.org', $superuser->refresh()->email);
+    }
+
     public function test_multi_company_user_cannot_be_moved_if_has_asset_in_different_company()
     {
         $this->settings->enableMultipleFullCompanySupport();
