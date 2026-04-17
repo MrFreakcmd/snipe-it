@@ -365,8 +365,9 @@
             </x-info-element>
         @endif
 
+        @php($canViewInfoPanelMap = ! ($infoPanelObj instanceof \App\Models\User) || auth()->user()?->can('manageContactInfo', \App\Models\User::class))
 
-        @if (($infoPanelObj->present()->displayAddress) && (config('services.google.maps_api_key')))
+        @if ($canViewInfoPanelMap && ($infoPanelObj->present()->displayAddress) && (config('services.google.maps_api_key')))
 
                 <x-info-element>
                     <div class="text-center">
@@ -375,7 +376,7 @@
                 </x-info-element>
         @endif
 
-        @if ((($infoPanelObj->address!='') && ($infoPanelObj->city!='')) || ($infoPanelObj->state!='') || ($infoPanelObj->country!=''))
+        @if ($canViewInfoPanelMap && ((($infoPanelObj->address!='') && ($infoPanelObj->city!='')) || ($infoPanelObj->state!='') || ($infoPanelObj->country!='')))
             <x-info-element>
                 <a class="btn btn-sm btn-theme" href="https://maps.google.com/?q={{ urlencode($infoPanelObj->address.','. $infoPanelObj->city.','.$infoPanelObj->state.','.$infoPanelObj->country.','.$infoPanelObj->zip) }}" target="_blank">
                     <x-icon type="google" class="hidden-print"/>

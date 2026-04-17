@@ -253,6 +253,7 @@ class ReportsController extends Controller
 
         $response = new StreamedResponse(function () {
             Log::debug('Starting streamed response');
+            $actionlogsTransformer = new ActionlogsTransformer;
 
             // Open output stream
             $handle = fopen('php://output', 'w');
@@ -283,7 +284,7 @@ class ReportsController extends Controller
 
             $actionlogs = Actionlog::with('item', 'user', 'target', 'location', 'adminuser')
                 ->orderBy('created_at', 'DESC')
-                ->chunk(500, function ($actionlogs) use ($handle) {
+                ->chunk(500, function ($actionlogs) use ($handle, $actionlogsTransformer) {
                     $executionTime = microtime(true) - $_SERVER['REQUEST_TIME_FLOAT'];
                     Log::debug('Walking results: '.$executionTime);
                     $count = 0;
@@ -302,7 +303,7 @@ class ReportsController extends Controller
                             $item_name = '';
                         }
 
-                        $transformedLogMeta = (new ActionlogsTransformer)->transformActionlog($actionlog)['log_meta'] ?? null;
+                        $transformedLogMeta = $actionlogsTransformer->transformActionlog($actionlog)['log_meta'] ?? null;
 
                         $row = [
                             $actionlog->created_at,
@@ -318,7 +319,7 @@ class ReportsController extends Controller
                             $actionlog->remote_ip,
                             $actionlog->user_agent,
                             $actionlog->action_source,
-                            $transformedLogMeta ? json_encode($transformedLogMeta) : null,
+                            is_array($transformedLogMeta) ? $actionlogsTransformer->formatChangedMetaForCsv($transformedLogMeta) : null,
                         ];
                         fputcsv($handle, $row);
                     }
@@ -352,6 +353,7 @@ class ReportsController extends Controller
 
         return view('reports/licenses', compact('licenses'));
     }
+
 
     /**
      * Exports the licenses to CSV

@@ -229,6 +229,29 @@ class ActionlogsTransformer
         return (new DatatablesTransformer)->transformDatatables($array, $total);
     }
 
+    public function formatChangedMetaForCsv(array $meta): ?string
+    {
+        if ($meta === []) {
+            return null;
+        }
+
+        $formattedChanges = [];
+
+        foreach ($meta as $field => $change) {
+            if (! is_array($change)) {
+                $formattedChanges[] = sprintf('%s: %s', $field, $this->stringifyChangedValueForCsv($change));
+
+                continue;
+            }
+
+            $old = $this->stringifyChangedValueForCsv($change['old'] ?? null);
+            $new = $this->stringifyChangedValueForCsv($change['new'] ?? null);
+            $formattedChanges[] = sprintf('%s (old: %s, new: %s)', $field, $old, $new);
+        }
+
+        return implode(' | ', $formattedChanges);
+    }
+
     /**
      * This takes the ids of the changed attributes and returns the names instead for the history view of an Asset
      *
@@ -375,6 +398,34 @@ class ActionlogsTransformer
         }
 
         return ! auth()->user()?->can('manageContactInfo', User::class);
+    }
+
+    private function stringifyChangedValueForCsv(mixed $value): string
+    {
+        if (is_null($value)) {
+            return '';
+        }
+
+        if (is_bool($value)) {
+            return $value ? 'true' : 'false';
+        }
+
+        if (is_array($value) || is_object($value)) {
+            return (string) json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        }
+
+        if (! is_string($value)) {
+            return (string) $value;
+        }
+
+        $decodedValue = html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $jsonValue = json_decode($decodedValue, true);
+
+        if (json_last_error() === JSON_ERROR_NONE && is_array($jsonValue)) {
+            return (string) json_encode($jsonValue, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        }
+
+        return $decodedValue;
     }
 
     private function normalizeAuditInterval(mixed $auditInterval): ?int

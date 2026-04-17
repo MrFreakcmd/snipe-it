@@ -5,6 +5,7 @@ namespace Tests\Feature\Users\Ui;
 use App\Models\Company;
 use App\Models\Group;
 use App\Models\User;
+use Illuminate\Support\Facades\Config;
 use Tests\TestCase;
 
 class ViewUserTest extends TestCase
@@ -134,5 +135,45 @@ class ViewUserTest extends TestCase
             ->get(route('users.show', $target))
             ->assertOk()
             ->assertSee('super.example.com');
+    }
+
+    public function test_hides_map_when_actor_lacks_contact_permission(): void
+    {
+        Config::set('services.google.maps_api_key', 'fake-map-key');
+
+        $actor = User::factory()->viewUsers()->create();
+        $target = User::factory()->create([
+            'address' => '123 Hidden St',
+            'city' => 'Nowhere',
+            'state' => 'CA',
+            'country' => 'US',
+            'zip' => '90001',
+        ]);
+
+        $this->actingAs($actor)
+            ->get(route('users.show', $target))
+            ->assertOk()
+            ->assertDontSee('maps.googleapis.com/maps/api/staticmap')
+            ->assertDontSee('maps.google.com/?q=');
+    }
+
+    public function test_shows_map_when_actor_has_contact_permission(): void
+    {
+        Config::set('services.google.maps_api_key', 'fake-map-key');
+
+        $actor = User::factory()->viewUsers()->manageContactInfo()->create();
+        $target = User::factory()->create([
+            'address' => '500 Visible Ave',
+            'city' => 'Somewhere',
+            'state' => 'WA',
+            'country' => 'US',
+            'zip' => '98052',
+        ]);
+
+        $this->actingAs($actor)
+            ->get(route('users.show', $target))
+            ->assertOk()
+            ->assertSee('maps.googleapis.com/maps/api/staticmap')
+            ->assertSee('maps.google.com/?q=');
     }
 }

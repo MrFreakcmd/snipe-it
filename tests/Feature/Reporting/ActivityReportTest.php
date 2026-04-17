@@ -8,6 +8,7 @@ use App\Models\Asset;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Testing\Fluent\AssertableJson;
+use League\Csv\Reader;
 use Tests\TestCase;
 
 class ActivityReportTest extends TestCase
@@ -188,5 +189,42 @@ class ActivityReportTest extends TestCase
 
         $this->assertArrayHasKey('days_to_next_audit', $withNullSettings);
         $this->assertArrayHasKey('days_to_next_audit', $withEmptySettingsObject);
+    }
+
+    public function test_activity_report_csv_formats_changed_column_readably(): void
+    {
+        $actor = User::factory()->canViewReports()->create();
+        $subject = User::factory()->create();
+
+        Actionlog::factory()->create([
+            'created_by' => $actor->id,
+            'item_id' => $subject->id,
+            'item_type' => User::class,
+            'target_id' => $subject->id,
+            'target_type' => User::class,
+            'action_type' => 'update',
+            'log_meta' => json_encode([
+                'permissions' => [
+                    'old' => json_encode(['import' => '0']),
+                    'new' => json_encode(['import' => '1']),
+                ],
+            ]),
+        ]);
+
+        $response = $this->actingAs($actor)
+            ->post(route('reports.activity.post'))
+            ->assertOk();
+
+        $csv = Reader::createFromString($response->streamedContent());
+        $csv->setHeaderOffset(0);
+
+        $rows = collect(iterator_to_array($csv->getRecords(), false));
+        $changedValue = $rows->pluck('Changed')
+            ->first(static fn (?string $value): bool => is_string($value) && str_contains($value, 'permissions'));
+
+        $this->assertNotNull($changedValue);
+        $this->assertStringContainsString('{"import":"0"}', $changedValue);
+        $this->assertStringContainsString('{"import":"1"}', $changedValue);
+        $this->assertStringNotContainsString('&quot;', $changedValue);
     }
 }
