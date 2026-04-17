@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\Reporting;
 
+use App\Http\Transformers\ActionlogsTransformer;
 use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\Company;
 use App\Models\User;
-use App\Http\Transformers\ActionlogsTransformer;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\TestCase;
 
