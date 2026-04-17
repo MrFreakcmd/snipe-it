@@ -204,6 +204,17 @@ class SnipeModel extends Model
         );
     }
 
+    /**
+     * This is used to set a base email attribute that the base model, so we can override it with the
+     * manageContactInfo permission check in the User model
+     */
+    protected function displayEmail(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value, array $attributes) => array_key_exists('email', $attributes) ? $attributes['email'] : null,
+        );
+    }
+
     public function getEula()
     {
 

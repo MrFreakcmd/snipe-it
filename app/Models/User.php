@@ -138,14 +138,23 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
      * @var array
      */
     protected $searchableAttributes = [
+        'address',
+        'city',
+        'country',
         'display_name',
+        'email',
         'employee_num',
         'first_name',
         'jobtitle',
         'last_name',
         'locale',
+        'mobile',
         'notes',
+        'phone',
+        'state',
         'username',
+        'website',
+        'zip',
     ];
 
     /**
@@ -268,10 +277,12 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         );
     }
 
-    protected function email(): Attribute
+    protected function displayEmail(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo', User::class)) ? $value : null,
+            get: fn (mixed $value, array $attributes) => (auth()->user()?->can('manageContactInfo', User::class))
+                ? ($attributes['email'] ?? $value)
+                : null,
         );
     }
 
@@ -1247,6 +1258,27 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         }
 
         return $query;
+    }
+
+    protected function canApplyStructuredFilterToAttribute(string $attribute): bool
+    {
+        $contactAttributes = [
+            'email',
+            'phone',
+            'mobile',
+            'address',
+            'city',
+            'state',
+            'country',
+            'zip',
+            'website',
+        ];
+
+        if (! in_array($attribute, $contactAttributes, true)) {
+            return true;
+        }
+
+        return auth()->user()?->can('manageContactInfo', User::class) ?? false;
     }
 
     /**
