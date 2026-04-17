@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Users\Api;
 
+use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\Company;
 use App\Models\Department;
@@ -13,6 +14,61 @@ use Tests\TestCase;
 
 class UpdateUserTest extends TestCase
 {
+    public function test_user_update_log_meta_only_includes_changed_permission_keys(): void
+    {
+        $admin = User::factory()->superuser()->create();
+        $targetUser = User::factory()->create([
+            'permissions' => json_encode([
+                'users.view' => '1',
+                'users.edit' => '1',
+                'reports.view' => '1',
+            ]),
+        ]);
+
+        $this->actingAsForApi($admin)
+            ->patchJson(route('api.users.update', $targetUser), [
+                'permissions' => [
+                    'users.view' => '1', // unchanged
+                    'users.edit' => '-1', // changed
+                    'licenses.view' => '1', // added
+                ],
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('success');
+
+        $log = Actionlog::query()
+            ->where('item_type', User::class)
+            ->where('item_id', $targetUser->id)
+            ->where('action_type', 'update')
+            ->latest('id')
+            ->firstOrFail();
+
+        $logMeta = json_decode((string) $log->log_meta, true);
+
+        $this->assertIsArray($logMeta);
+        $this->assertArrayHasKey('permissions', $logMeta);
+
+        $permissionsMeta = $logMeta['permissions'];
+        $this->assertArrayHasKey('old', $permissionsMeta);
+        $this->assertArrayHasKey('new', $permissionsMeta);
+
+        $this->assertArrayNotHasKey('users.view', $permissionsMeta['old']);
+        $this->assertArrayNotHasKey('users.view', $permissionsMeta['new']);
+
+        $this->assertSame('1', (string) ($permissionsMeta['old']['users.edit'] ?? null));
+        $this->assertSame('-1', (string) ($permissionsMeta['new']['users.edit'] ?? null));
+
+        $this->assertArrayHasKey('reports.view', $permissionsMeta['old']);
+        $this->assertArrayHasKey('reports.view', $permissionsMeta['new']);
+        $this->assertSame('1', (string) $permissionsMeta['old']['reports.view']);
+        $this->assertNull($permissionsMeta['new']['reports.view']);
+
+        $this->assertArrayHasKey('licenses.view', $permissionsMeta['old']);
+        $this->assertArrayHasKey('licenses.view', $permissionsMeta['new']);
+        $this->assertNull($permissionsMeta['old']['licenses.view']);
+        $this->assertSame('1', (string) $permissionsMeta['new']['licenses.view']);
+    }
+
     public function test_can_update_user_via_patch()
     {
         $admin = User::factory()->superuser()->create();

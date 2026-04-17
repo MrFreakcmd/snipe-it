@@ -138,23 +138,14 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
      * @var array
      */
     protected $searchableAttributes = [
-        'address',
-        'city',
-        'country',
         'display_name',
-        'email',
         'employee_num',
         'first_name',
         'jobtitle',
         'last_name',
         'locale',
-        'mobile',
         'notes',
-        'phone',
-        'state',
         'username',
-        'website',
-        'zip',
     ];
 
     /**
@@ -218,7 +209,8 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     }
 
     /**
-     * These fields should be hidden if the requesting user cannot view contact info
+     * These fields should be hidden if the requesting user cannot view contact info. The nav panel will try to
+     * automagically display these values in the sidebar, but we don't want that if they're not supposed to see them
      */
     protected function address(): Attribute
     {
@@ -273,6 +265,13 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     {
         return Attribute::make(
             get: fn (mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo', User::class)) ? $value : null,
+        );
+    }
+
+    protected function email(): Attribute
+    {
+        return Attribute::make(
+            get: fn(mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo', User::class)) ? $value : null,
         );
     }
 
@@ -1233,6 +1232,18 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
                     'users.last_name',
                 ], $term
             );
+
+            if (auth()->user()?->can('manageContactInfo', User::class)) {
+                $query->orWhere('users.email', 'LIKE', '%' . $term . '%')
+                    ->orWhere('users.phone', 'LIKE', '%' . $term . '%')
+                    ->orWhere('users.mobile', 'LIKE', '%' . $term . '%')
+                    ->orWhere('users.address', 'LIKE', '%' . $term . '%')
+                    ->orWhere('users.city', 'LIKE', '%' . $term . '%')
+                    ->orWhere('users.state', 'LIKE', '%' . $term . '%')
+                    ->orWhere('users.country', 'LIKE', '%' . $term . '%')
+                    ->orWhere('users.zip', 'LIKE', '%' . $term . '%')
+                    ->orWhere('users.website', 'LIKE', '%' . $term . '%');
+            }
         }
 
         return $query;
@@ -1400,11 +1411,8 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
 
         return $query->where('location_id', '=', $location)
             ->where('users.first_name', 'LIKE', '%'.$search.'%')
-            ->orWhere('users.email', 'LIKE', '%'.$search.'%')
             ->orWhere('users.last_name', 'LIKE', '%'.$search.'%')
             ->orWhere('users.permissions', 'LIKE', '%'.$search.'%')
-            ->orWhere('users.country', 'LIKE', '%'.$search.'%')
-            ->orWhere('users.phone', 'LIKE', '%'.$search.'%')
             ->orWhere('users.jobtitle', 'LIKE', '%'.$search.'%')
             ->orWhere('users.employee_num', 'LIKE', '%'.$search.'%')
             ->orWhere('users.username', 'LIKE', '%'.$search.'%')

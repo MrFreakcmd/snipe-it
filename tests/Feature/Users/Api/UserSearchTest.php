@@ -145,6 +145,31 @@ class UserSearchTest extends TestCase
         );
     }
 
+    public function test_users_can_be_searched_by_email_with_contact_permission()
+    {
+        User::factory()->create(['first_name' => 'Luke', 'last_name' => 'Skywalker', 'email' => 'luke@jedis.org']);
+
+        Passport::actingAs(User::factory()->viewUsers()->manageContactInfo()->create());
+
+        $response = $this->getJson(route('api.users.index', ['search' => 'luke@jedis']))->assertOk();
+        $results = collect($response->json('rows'));
+
+        $this->assertEquals(1, $results->count());
+        $this->assertTrue($results->pluck('name')->contains(fn ($text) => str_contains($text, 'Luke')));
+    }
+
+    public function test_users_cannot_be_searched_by_email_without_contact_permission()
+    {
+        User::factory()->create(['first_name' => 'Luke', 'last_name' => 'Skywalker', 'email' => 'luke@jedis.org']);
+
+        Passport::actingAs(User::factory()->viewUsers()->create());
+
+        $response = $this->getJson(route('api.users.index', ['search' => 'luke@jedis']))->assertOk();
+        $results = collect($response->json('rows'));
+
+        $this->assertEquals(0, $results->count());
+    }
+
     public function test_users_index_when_invalid_sort_field_is_passed()
     {
         $this->markIncompleteIfSqlite('This test is not compatible with SQLite');

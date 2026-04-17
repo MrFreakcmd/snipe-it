@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Helper;
+use App\Http\Transformers\ActionlogsTransformer;
 use App\Http\Requests\CustomAssetReportRequest;
 use App\Mail\CheckoutAccessoryMail;
 use App\Mail\CheckoutAssetMail;
@@ -25,6 +26,7 @@ use App\Models\LicenseSeat;
 use App\Models\Maintenance;
 use App\Models\ReportTemplate;
 use App\Models\Setting;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -300,6 +302,8 @@ class ReportsController extends Controller
                             $item_name = '';
                         }
 
+                        $transformedLogMeta = (new ActionlogsTransformer)->transformActionlog($actionlog)['log_meta'] ?? null;
+
                         $row = [
                             $actionlog->created_at,
                             ($actionlog->adminuser) ? $actionlog->adminuser->display_name : '',
@@ -314,7 +318,7 @@ class ReportsController extends Controller
                             $actionlog->remote_ip,
                             $actionlog->user_agent,
                             $actionlog->action_source,
-                            $actionlog->log_meta,
+                            $transformedLogMeta ? json_encode($transformedLogMeta) : null,
                         ];
                         fputcsv($handle, $row);
                     }
@@ -444,6 +448,13 @@ class ReportsController extends Controller
     {
         ini_set('max_execution_time', env('REPORT_TIME_LIMIT', 12000)); // 12000 seconds = 200 minutes
         $this->authorize('reports.view');
+
+        // Prevent users without contact permission from requesting sensitive user columns in CSV exports.
+        if (! auth()->user()?->can('manageContactInfo', User::class)) {
+            foreach (['email', 'phone', 'user_address', 'user_city', 'user_state', 'user_country', 'user_zip'] as $field) {
+                $request->request->remove($field);
+            }
+        }
 
         $this->disableDebugbar();
 

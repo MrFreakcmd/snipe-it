@@ -494,7 +494,11 @@ class UsersController extends Controller
             // Blank out some fields
             $user->first_name = '';
             $user->last_name = '';
-            $user->email = substr($user->email, ($pos = strpos($user->email, '@')) !== false ? $pos : 0);
+            if (auth()->user()->can('manageContactInfo', User::class)) {
+                $user->email = substr($user->email, ($pos = strpos($user->email, '@')) !== false ? $pos : 0);
+            } else {
+                $user->email = '';
+            }
             $user->id = null;
             $user->username = null;
             $user->avatar = null;

@@ -61,6 +61,20 @@ class UserObserver
                 // Check and see if the value changed
                 if ($user->getRawOriginal()[$key] != $user->getAttributes()[$key]) {
 
+                    if ($key == 'permissions') {
+                        $permissionsChangeSet = $this->buildPermissionsChangeSet(
+                            $user->getRawOriginal()[$key],
+                            $user->getAttributes()[$key]
+                        );
+
+                        if (! empty($permissionsChangeSet)) {
+                            $changed[$key]['old'] = $permissionsChangeSet['old'];
+                            $changed[$key]['new'] = $permissionsChangeSet['new'];
+                        }
+
+                        continue;
+                    }
+
                     $changed[$key]['old'] = $user->getRawOriginal()[$key];
                     $changed[$key]['new'] = $user->getAttributes()[$key];
 
@@ -87,6 +101,62 @@ class UserObserver
             $logAction->logaction('update');
         }
 
+    }
+
+    /**
+     * Build a compact permission diff so log_meta only includes changed permission keys.
+     */
+    private function buildPermissionsChangeSet(mixed $oldPermissions, mixed $newPermissions): array
+    {
+        $old = $this->decodePermissions($oldPermissions);
+        $new = $this->decodePermissions($newPermissions);
+
+        if ($old === null || $new === null) {
+            return [
+                'old' => $oldPermissions,
+                'new' => $newPermissions,
+            ];
+        }
+
+        $changedOld = [];
+        $changedNew = [];
+        $keys = array_unique(array_merge(array_keys($old), array_keys($new)));
+
+        foreach ($keys as $permissionKey) {
+            $oldValue = $old[$permissionKey] ?? null;
+            $newValue = $new[$permissionKey] ?? null;
+
+            if ((string) $oldValue === (string) $newValue) {
+                continue;
+            }
+
+            $changedOld[$permissionKey] = $oldValue;
+            $changedNew[$permissionKey] = $newValue;
+        }
+
+        if (($changedOld === []) && ($changedNew === [])) {
+            return [];
+        }
+
+        return [
+            'old' => $changedOld,
+            'new' => $changedNew,
+        ];
+    }
+
+    private function decodePermissions(mixed $permissions): ?array
+    {
+        if (is_array($permissions)) {
+            return $permissions;
+        }
+
+        if (! is_string($permissions) || trim($permissions) === '') {
+            return [];
+        }
+
+        $decoded = json_decode($permissions, true);
+
+        return is_array($decoded) ? $decoded : null;
     }
 
     /**
