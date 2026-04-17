@@ -279,7 +279,6 @@ class UsersController extends Controller
             $user->zip = $request->input('zip', null);
         }
 
-
         $user->first_name = $request->input('first_name');
         $user->last_name = $request->input('last_name');
         $user->display_name = $request->input('display_name');
@@ -597,7 +596,6 @@ class UsersController extends Controller
                 trans('general.created_at'),
                 trans('general.created_by'),
             );
-
 
             $users = User::with(
                 'assets',

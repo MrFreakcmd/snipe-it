@@ -457,7 +457,6 @@ return [
         'name' => 'Create Depreciation Records',
     ],
 
-
     'grant_all' => 'Grant all permissions for :area',
     'deny_all' => 'Deny all permissions for :area',
     'inherit_all' => 'Inherit all permissions for :area from permission groups',

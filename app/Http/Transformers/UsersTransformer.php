@@ -63,7 +63,6 @@ class UsersTransformer
             $array += $sensitive_fields;
         }
 
-
         $array += [
 
             'department' => ($user->department) ? [

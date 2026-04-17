@@ -125,9 +125,8 @@ class UserPresenter extends Presenter
                 'title' => trans('admin/users/general.remote'),
                 'visible' => false,
                 'formatter' => 'trueFalseFormatter',
-            ]
+            ],
         ];
-
 
         $sensitive_fields = [
             [
@@ -205,7 +204,7 @@ class UserPresenter extends Presenter
                 'switchable' => true,
                 'title' => trans('general.zip'),
                 'visible' => false,
-            ]
+            ],
         ];
 
         // Add the sensitive fields in if the user can see them
@@ -215,15 +214,14 @@ class UserPresenter extends Presenter
             }
         }
 
-
         array_push($layout, [
-                'field' => 'locale',
-                'searchable' => true,
-                'sortable' => true,
-                'switchable' => true,
-                'title' => trans('general.language'),
-                'visible' => false,
-            ],
+            'field' => 'locale',
+            'searchable' => true,
+            'sortable' => true,
+            'switchable' => true,
+            'title' => trans('general.language'),
+            'visible' => false,
+        ],
             [
                 'field' => 'department',
                 'searchable' => true,
@@ -446,7 +444,6 @@ class UserPresenter extends Presenter
                 'class' => 'hidden-print',
             ],
         );
-
 
         return json_encode($layout);
     }

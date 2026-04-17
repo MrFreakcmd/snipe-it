@@ -169,7 +169,7 @@ class CreateUserTest extends TestCase
         $this->assertArrayNotHasKey('superuser', $decoded, 'Admin should not be able to grant superuser during create');
     }
 
-    public function testCannotUpdateContactWithoutPermission()
+    public function test_cannot_update_contact_without_permission()
     {
         Notification::fake();
 
@@ -202,5 +202,4 @@ class CreateUserTest extends TestCase
         $this->followRedirects($response)->assertSee('Success');
 
     }
-
 }

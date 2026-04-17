@@ -164,7 +164,6 @@ class UsersController extends Controller
             );
         }
 
-
         // This invokes the Searchable model trait scopeTextSearch and will handle input by search or by advanced search filter
         if ($request->filled('filter') || $request->filled('search')) {
             $users->TextSearch($request->input('filter') ? $request->input('filter') : $request->input('search'));
@@ -405,7 +404,7 @@ class UsersController extends Controller
 
                 // Check that the requesting user can search against the email field
                 if (auth()->user()->can('manageContactInfo')) {
-                    $query->orWhere('users.email', 'LIKE', '%' . $request->input('search') . '%');
+                    $query->orWhere('users.email', 'LIKE', '%'.$request->input('search').'%');
                 }
 
             });
@@ -533,7 +532,6 @@ class UsersController extends Controller
     public function update(SaveUserRequest $request, User $user): JsonResponse
     {
         $this->authorize('update', $user);
-
 
         /**
          * This is a janky hack to prevent people from changing admin demo user data on the public demo.
