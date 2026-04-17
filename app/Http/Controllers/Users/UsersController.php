@@ -671,6 +671,7 @@ class UsersController extends Controller
                         array_push($values,
                             ($user->manager) ? $user->manager->display_name : '',
                             ($user->userloc) ? $user->userloc->name : '',
+                            ($user->department) ? $user->department->name : '',
                             (($user->department) && ($user->department->manager)) ? $user->department->manager->display_name : '',
                             $user->assets_count,
                             $user->licenses_count,
