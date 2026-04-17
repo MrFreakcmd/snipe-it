@@ -113,4 +113,26 @@ class ViewUserTest extends TestCase
             ->assertOk()
             ->assertSee('super@example.com');
     }
+
+    public function test_hides_website_when_actor_lacks_contact_permission(): void
+    {
+        $actor = User::factory()->viewUsers()->create();
+        $target = User::factory()->create(['website' => 'https://hidden.example.com']);
+
+        $this->actingAs($actor)
+            ->get(route('users.show', $target))
+            ->assertOk()
+            ->assertDontSee('hidden.example.com');
+    }
+
+    public function test_superuser_can_see_website_on_user_view(): void
+    {
+        $actor = User::factory()->superuser()->create();
+        $target = User::factory()->create(['website' => 'https://super.example.com']);
+
+        $this->actingAs($actor)
+            ->get(route('users.show', $target))
+            ->assertOk()
+            ->assertSee('super.example.com');
+    }
 }

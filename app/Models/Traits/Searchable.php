@@ -180,16 +180,26 @@ trait Searchable
         $searchableCounts = $this->getSearchableCounts();
         $searchableRelations = $this->getSearchableRelations();
         $table = $this->getTable();
+        $appliedFilterCount = 0;
+        $blockedAttributeFilterCount = 0;
 
         foreach ($filters as $filterKey => $filterValue) {
             if (in_array($filterKey, $searchableAttributes, true)) {
+                if (!$this->canApplyStructuredFilterToAttribute($filterKey)) {
+                    $blockedAttributeFilterCount++;
+
+                    continue;
+                }
+
                 $query->where($table.'.'.$filterKey, 'LIKE', '%'.$filterValue.'%');
+                $appliedFilterCount++;
 
                 continue;
             }
 
             if (in_array($filterKey, $searchableCounts, true)) {
                 $query = $this->applyCountAliasFilter($query, $filterKey, $filterValue);
+                $appliedFilterCount++;
 
                 continue;
             }
@@ -202,6 +212,7 @@ trait Searchable
 
                 if ($dbColumn !== null) {
                     $query->where($table.'.'.$dbColumn, 'LIKE', '%'.$filterValue.'%');
+                    $appliedFilterCount++;
 
                     continue;
                 }
@@ -215,6 +226,7 @@ trait Searchable
 
             if ($this->isAssignedToRelationKey($resolvedRelationKey)) {
                 $query = $this->applyAssignedToRelationFilter($query, $resolvedRelationKey, $filterValue);
+                $appliedFilterCount++;
 
                 continue;
             }
@@ -249,6 +261,17 @@ trait Searchable
                     );
                 }
             });
+            $appliedFilterCount++;
+        }
+
+        // If the request only contains blocked sensitive attribute filters,
+        // force no results instead of returning broad unfiltered data.
+        // This is specificially used in the User model to block filtering on email/phone/etc. for users
+        // without the Policies/UserPolicy.php -> manageContactInfo permission, but this is a good safeguard
+        // in general to prevent accidentally returning unfiltered results when all
+        // provided filters are invalid or blocked.
+        if (($appliedFilterCount === 0) && ($blockedAttributeFilterCount > 0)) {
+            $query->whereKey([]);
         }
 
         return $query;
@@ -407,6 +430,10 @@ trait Searchable
         $firstConditionAdded = false;
 
         foreach ($this->getSearchableAttributes() as $column) {
+            if (!$this->canApplyStructuredFilterToAttribute($column)) {
+                continue;
+            }
+
             foreach ($terms as $term) {
                 /**
                  * Making sure to only search in date columns if the search term consists of characters that can make up a MySQL timestamp!
@@ -633,6 +660,14 @@ trait Searchable
     private function getSearchableAttributes()
     {
         return $this->searchableAttributes ?? [];
+    }
+
+    /**
+     * Allow models to deny structured filters for specific attributes.
+     */
+    protected function canApplyStructuredFilterToAttribute(string $attribute): bool
+    {
+        return true;
     }
 
     /**

@@ -54,7 +54,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'name',
-                'searchable' => true,
+                'searchable' => false,
                 'sortable' => true,
                 'title' => trans('admin/users/table.name'),
                 'visible' => true,
