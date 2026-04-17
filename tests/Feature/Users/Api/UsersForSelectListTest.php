@@ -49,14 +49,14 @@ class UsersForSelectListTest extends TestCase
         $results = collect($response->json('results'));
 
         $this->assertEquals(1, $results->count());
-        $this->assertTrue($results->pluck('text')->contvains(fn ($text) => str_contains($text, 'Luke')));
+        $this->assertTrue($results->pluck('text')->contains(fn($text) => str_contains($text, 'Luke')));
     }
 
     public function test_users_can_be_searched_by_email()
     {
         User::factory()->create(['first_name' => 'Luke', 'last_name' => 'Skywalker', 'email' => 'luke@jedis.org']);
 
-        Passport::actingAs(User::factory()->create()->manageContactInfo());
+        Passport::actingAs(User::factory()->manageContactInfo()->create());
         $response = $this->getJson(route('api.users.selectlist', ['search' => 'luke@jedis']))->assertOk();
 
         $results = collect($response->json('results'));
