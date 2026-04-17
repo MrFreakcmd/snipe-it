@@ -15,4 +15,9 @@ class UserPolicy extends SnipePermissionsPolicy
     {
         return $user->hasAccess($this->columnName().'.files');
     }
+
+    public function manageContactInfo(User $user)
+    {
+        return $user->hasAccess('users.contact');
+    }
 }

@@ -117,7 +117,12 @@ return [
 
     'usersfiles' => [
         'name' => 'Manage User Files',
-        'note' => 'Allows the user to upload, download, and delete files associated with users. (This only makes sense with view privileges or higher.)',
+        'note' => 'Allows the user to view, upload, download, and delete files associated with users.',
+    ],
+
+    'userscontact' => [
+        'name' => 'View/Edit User Contact Info',
+        'note' => 'Allows the user to view and edit personal contact information about the user. This includes: address, city, state/province, country, postal code, phone number, mobile number, email address, and website.',
     ],
 
     'modelsfiles' => [
@@ -451,6 +456,7 @@ return [
     'depreciationscreate' => [
         'name' => 'Create Depreciation Records',
     ],
+
 
     'grant_all' => 'Grant all permissions for :area',
     'deny_all' => 'Deny all permissions for :area',

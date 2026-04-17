@@ -168,4 +168,39 @@ class CreateUserTest extends TestCase
         $this->assertSame('1', (string) ($decoded['admin'] ?? null), 'Admin should be able to grant admin during create');
         $this->assertArrayNotHasKey('superuser', $decoded, 'Admin should not be able to grant superuser during create');
     }
+
+    public function testCannotUpdateContactWithoutPermission()
+    {
+        Notification::fake();
+
+        $response = $this->actingAs(User::factory()->createUsers()->viewUsers()->create())
+            ->from(route('users.index'))
+            ->post(route('users.store'), [
+                'first_name' => 'Test First Name',
+                'last_name' => 'Test Last Name',
+                'username' => 'testuser',
+                'password' => 'testpassword1235!!',
+                'password_confirmation' => 'testpassword1235!!',
+                'activated' => '1',
+                'email' => 'foo@example.org',
+                'notes' => 'Test Note',
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertStatus(302)
+            ->assertRedirect(route('users.index'));
+
+        $this->assertDatabaseHas('users', [
+            'first_name' => 'Test First Name',
+            'last_name' => 'Test Last Name',
+            'username' => 'testuser',
+            'activated' => '1',
+            'email' => null,
+            'notes' => 'Test Note',
+
+        ]);
+        Notification::assertNothingSent();
+        $this->followRedirects($response)->assertSee('Success');
+
+    }
+
 }

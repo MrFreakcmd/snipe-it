@@ -217,6 +217,67 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         });
     }
 
+
+    /**
+     * These fields should be hidden if the requesting user cannot view contact info
+     */
+    protected function address(): Attribute
+    {
+        return Attribute::make(
+            get: fn(mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo')) ? $value : null,
+        );
+    }
+
+    protected function city(): Attribute
+    {
+        return Attribute::make(
+            get: fn(mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo')) ? $value : null,
+        );
+    }
+
+    protected function state(): Attribute
+    {
+        return Attribute::make(
+            get: fn(mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo')) ? $value : null,
+        );
+    }
+
+    protected function country(): Attribute
+    {
+        return Attribute::make(
+            get: fn(mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo')) ? $value : null,
+        );
+    }
+
+    protected function zip(): Attribute
+    {
+        return Attribute::make(
+            get: fn(mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo')) ? $value : null,
+        );
+    }
+
+    protected function phone(): Attribute
+    {
+        return Attribute::make(
+            get: fn(mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo')) ? $value : null,
+        );
+    }
+
+    protected function mobile(): Attribute
+    {
+        return Attribute::make(
+            get: fn(mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo')) ? $value : null,
+        );
+    }
+
+    protected function website(): Attribute
+    {
+        return Attribute::make(
+            get: fn(mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo')) ? $value : null,
+        );
+    }
+
+
     /**
      * Revoke all Passport access/refresh tokens associated with this user.
      */
@@ -1145,9 +1206,11 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
      */
     public function scopeSimpleNameSearch($query, $search)
     {
-        return $query->where('first_name', 'LIKE', '%'.$search.'%')
-            ->orWhere('last_name', 'LIKE', '%'.$search.'%')
-            ->orWhere('display_name', 'LIKE', '%'.$search.'%')
+        return $query->where('users.first_name', 'LIKE', '%' . $search . '%')
+            ->orWhere('users.last_name', 'LIKE', '%' . $search . '%')
+            ->orWhere('users.username', 'LIKE', '%' . $search . '%')
+            ->orWhere('users.display_name', 'LIKE', '%' . $search . '%')
+            ->orWhere('users.employee_num', 'LIKE', '%' . $search . '%')
             ->orWhereMultipleColumns(
                 [
                     'users.first_name',

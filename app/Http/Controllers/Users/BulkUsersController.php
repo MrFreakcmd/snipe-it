@@ -176,8 +176,15 @@ class BulkUsersController extends Controller
             ->conditionallyAddItem('display_name')
             ->conditionallyAddItem('start_date')
             ->conditionallyAddItem('end_date')
-            ->conditionallyAddItem('city')
             ->conditionallyAddItem('autoassign_licenses');
+
+        // Check that the user can manage contact info for users
+        if (auth()->user()->can('manageContactInfo')) {
+            $this->conditionallyAddItem('city')
+                ->conditionallyAddItem('state')
+                ->conditionallyAddItem('country')
+                ->conditionallyAddItem('zip');
+        }
 
         // If the manager_id is one of the users being updated, generate a warning.
         if (array_search($request->input('manager_id'), $user_raw_array)) {

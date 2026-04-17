@@ -108,7 +108,6 @@ class UsersController extends Controller
                 'last_name',
                 'first_name',
                 'display_name',
-                'email',
                 'jobtitle',
                 'username',
                 'employee_num',
@@ -125,13 +124,6 @@ class UsersController extends Controller
                 'accessories_count',
                 'manages_users_count',
                 'manages_locations_count',
-                'phone',
-                'mobile',
-                'address',
-                'city',
-                'state',
-                'country',
-                'zip',
                 'id',
                 'ldap_import',
                 'two_factor_optin',
@@ -141,7 +133,6 @@ class UsersController extends Controller
                 'start_date',
                 'end_date',
                 'autoassign_licenses',
-                'website',
                 'locale',
                 'notes',
                 'employee_num',
@@ -158,20 +149,21 @@ class UsersController extends Controller
 
             ];
 
-        $filter = [];
-
-        if ($request->filled('filter')) {
-            $filter = json_decode($request->input('filter'), true);
-
-            if (is_null($filter)) {
-                $filter = [];
-            }
-
-            $filter = array_filter($filter, function ($key) use ($allowed_columns) {
-                return in_array($key, $allowed_columns);
-            }, ARRAY_FILTER_USE_KEY);
-
+        // Do not even request these fields if the requesting user cannot manage user contact info
+        if (auth()->user()->can('manageContactInfo')) {
+            array_push($allowed_columns,
+                'address',
+                'city',
+                'country',
+                'email',
+                'mobile',
+                'phone',
+                'state',
+                'website',
+                'zip',
+            );
         }
+
 
         // This invokes the Searchable model trait scopeTextSearch and will handle input by search or by advanced search filter
         if ($request->filled('filter') || $request->filled('search')) {
@@ -194,12 +186,41 @@ class UsersController extends Controller
             $users = $users->where('users.company_id', '=', $request->input('company_id'));
         }
 
-        if ($request->filled('phone')) {
-            $users = $users->where('users.phone', '=', $request->input('phone'));
-        }
+        // Check that the user can view contact info
+        if (auth()->user()->can('manageContactInfo')) {
 
-        if ($request->filled('mobile')) {
-            $users = $users->where('users.mobile', '=', $request->input('mobile'));
+            if ($request->filled('address')) {
+                $users = $users->where('users.address', '=', $request->input('address'));
+            }
+
+            if ($request->filled('phone')) {
+                $users = $users->where('users.phone', '=', $request->input('phone'));
+            }
+
+            if ($request->filled('mobile')) {
+                $users = $users->where('users.mobile', '=', $request->input('mobile'));
+            }
+
+            if ($request->filled('email')) {
+                $users = $users->where('users.email', '=', $request->input('email'));
+            }
+
+            if ($request->filled('state')) {
+                $users = $users->where('users.state', '=', $request->input('state'));
+            }
+
+            if ($request->filled('country')) {
+                $users = $users->where('users.country', '=', $request->input('country'));
+            }
+
+            if ($request->filled('website')) {
+                $users = $users->where('users.website', '=', $request->input('website'));
+            }
+
+            if ($request->filled('zip')) {
+                $users = $users->where('users.zip', '=', $request->input('zip'));
+            }
+
         }
 
         if ($request->filled('location_id')) {
@@ -208,10 +229,6 @@ class UsersController extends Controller
 
         if ($request->filled('created_by')) {
             $users = $users->where('users.created_by', '=', $request->input('created_by'));
-        }
-
-        if ($request->filled('email')) {
-            $users = $users->where('users.email', '=', $request->input('email'));
         }
 
         if ($request->filled('username')) {
@@ -232,22 +249,6 @@ class UsersController extends Controller
 
         if ($request->filled('employee_num')) {
             $users = $users->where('users.employee_num', '=', $request->input('employee_num'));
-        }
-
-        if ($request->filled('state')) {
-            $users = $users->where('users.state', '=', $request->input('state'));
-        }
-
-        if ($request->filled('country')) {
-            $users = $users->where('users.country', '=', $request->input('country'));
-        }
-
-        if ($request->filled('website')) {
-            $users = $users->where('users.website', '=', $request->input('website'));
-        }
-
-        if ($request->filled('zip')) {
-            $users = $users->where('users.zip', '=', $request->input('zip'));
         }
 
         if ($request->filled('group_id')) {
@@ -380,27 +381,33 @@ class UsersController extends Controller
      */
     public function selectlist(Request $request): array
     {
-        $users = User::select(
-            [
-                'users.id',
-                'users.username',
-                'users.employee_num',
-                'users.first_name',
-                'users.last_name',
-                'users.display_name',
-                'users.gravatar',
-                'users.avatar',
-                'users.email',
-            ]
-        )->where('show_in_list', '=', '1');
+        $select_array = [
+            'users.id',
+            'users.username',
+            'users.employee_num',
+            'users.first_name',
+            'users.last_name',
+            'users.display_name',
+            'users.gravatar',
+            'users.avatar',
+        ];
+
+        if (auth()->user()->can('manageContactInfo')) {
+            array_push($select_array, 'users.email');
+        }
+
+        $users = User::select($select_array)->where('show_in_list', '=', '1');
 
         if ($request->filled('search')) {
             $users = $users->where(function ($query) use ($request) {
-                $query->SimpleNameSearch($request->input('search'))
-                    ->orWhere('username', 'LIKE', '%'.$request->input('search').'%')
-                    ->orWhere('display_name', 'LIKE', '%'.$request->input('search').'%')
-                    ->orWhere('email', 'LIKE', '%'.$request->input('search').'%')
-                    ->orWhere('employee_num', 'LIKE', '%'.$request->input('search').'%');
+
+                $query->SimpleNameSearch($request->input('search'));
+
+                // Check that the requesting user can search against the email field
+                if (auth()->user()->can('manageContactInfo')) {
+                    $query->orWhere('users.email', 'LIKE', '%' . $request->input('search') . '%');
+                }
+
             });
         }
 
@@ -527,7 +534,6 @@ class UsersController extends Controller
     {
         $this->authorize('update', $user);
 
-        $authenticatedUser = auth()->user();
 
         /**
          * This is a janky hack to prevent people from changing admin demo user data on the public demo.
@@ -535,11 +541,34 @@ class UsersController extends Controller
          *  Thanks, jerks. You are why we can't have nice things. - snipe
          */
         if ((($user->id == 1) || ($user->id == 2)) && (config('app.lock_passwords'))) {
-            return response()->json(Helper::formatStandardApiResponse('error', null, 'Permission denied. You cannot update user information via API on the demo.'));
+            return response()->json(Helper::formatStandardApiResponse('error', null, 'Permission denied. You cannot update superuser information via API on the demo.'));
         }
 
         // Pull out sensitive fields that require extra permission
-        $user->fill($request->except(['password', 'username', 'email', 'activated', 'permissions', 'activation_code', 'remember_token', 'two_factor_secret', 'two_factor_enrolled', 'two_factor_optin']));
+        $user->fill($request->except([
+            'activated',
+            'activation_code',
+            'created_by',
+            'email',
+            'password',
+            'permissions',
+            'remember_token',
+            'two_factor_enrolled',
+            'two_factor_optin',
+            'two_factor_secret',
+            'username',
+        ]));
+
+        if (auth()->user()->cannot('manageContactInfo')) {
+            $request->request->remove('address');
+            $request->request->remove('city');
+            $request->request->remove('country');
+            $request->request->remove('mobile');
+            $request->request->remove('phone');
+            $request->request->remove('state');
+            $request->request->remove('website');
+            $request->request->remove('zip');
+        }
 
         if (auth()->user()->can('canEditAuthFields', $user) && auth()->user()->can('editableOnDemo')) {
 
@@ -567,7 +596,7 @@ class UsersController extends Controller
                 // This is going to update the whole thing, not just what was passed.
                 $user->permissions = json_encode(PreserveUnauthorizedPrivilegedPermissionsAction::run(
                     requestedPermissions: NormalizePermissionsPayloadAction::run($request->input('permissions')),
-                    authenticatedUser: $authenticatedUser,
+                    authenticatedUser: auth()->user(),
                     originalPermissions: NormalizePermissionsPayloadAction::run($user->decodePermissions()),
                 ));
             }

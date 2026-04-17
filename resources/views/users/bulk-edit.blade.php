@@ -20,7 +20,7 @@
         }
     </style>
     <div class="row">
-        <div class="col-md-8 col-md-offset-2">
+        <div class="col-md-6 col-md-offset-3">
 
             <p>{{ trans('admin/users/general.bulk_update_help') }}</p>
 
@@ -108,6 +108,7 @@
                             </div>
                         </div>
 
+                        @can('manageContactInfo', $user)
                         <!-- City -->
                         <div class="form-group{{ $errors->has('city') ? ' has-error' : '' }}">
                             <label class="col-md-3 control-label" for="city">{{ trans('general.city') }}</label>
@@ -116,6 +117,37 @@
                                 {!! $errors->first('city', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
                             </div>
                         </div>
+
+                            <div class="form-group{{ $errors->has('state') ? ' has-error' : '' }}">
+                                <label class="col-md-3 control-label" for="state">{{ trans('general.state') }}</label>
+                                <div class="col-md-4">
+                                    <input class="form-control" type="text" name="state" id="state" aria-label="state"/>
+                                    {!! $errors->first('state', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                </div>
+                            </div>
+
+                            <!-- Country -->
+                            <div class="form-group{{ $errors->has('country') ? ' has-error' : '' }}">
+                                <label class="col-md-3 control-label" for="country">{{ trans('general.country') }}</label>
+                                <div class="col-md-6">
+                                    <x-input.country-select
+                                        name="country"
+                                        class="col-md-12"
+                                    />
+
+                                    <p class="help-block">{{ trans('general.countries_manually_entered_help') }}</p>
+                                    {!! $errors->first('country', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                </div>
+                            </div>
+
+                            <div class="form-group{{ $errors->has('zip') ? ' has-error' : '' }}">
+                                <label class="col-md-3 control-label" for="zip">{{ trans('general.zip') }}</label>
+                                <div class="col-md-4">
+                                    <input class="form-control" type="text" name="zip" id="zip" aria-label="zip"/>
+                                    {!! $errors->first('zip', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                </div>
+                            </div>
+                        @endcan
 
                          <!-- remote -->
                          <div class="form-group">
@@ -162,7 +194,7 @@
                             </div>
                         </div> <!--/form-group-->
 
-                        <!-- activated -->
+                        <!-- autoassign -->
                         <div class="form-group">
                             <div class="col-sm-3 control-label">
                                 {{ trans('general.autoassign_licenses') }}

@@ -28,6 +28,18 @@ class UsersTransformer
         } elseif ($user->isAdmin()) {
             $role = 'admin';
         }
+        $sensitive_fields = [
+            'email' => ($user->email) ? e($user->email) : null,
+            'phone' => ($user->phone) ? e($user->phone) : null,
+            'mobile' => ($user->mobile) ? e($user->mobile) : null,
+            'website' => ($user->website) ? e($user->website) : null,
+            'address' => ($user->address) ? e($user->address) : null,
+            'city' => ($user->city) ? e($user->city) : null,
+            'state' => ($user->state) ? e($user->state) : null,
+            'country' => ($user->country) ? e($user->country) : null,
+            'zip' => ($user->zip) ? e($user->zip) : null,
+        ];
+
         $array = [
             'id' => (int) $user->id,
             'avatar' => e($user->present()->gravatar) ?? null,
@@ -45,15 +57,15 @@ class UsersTransformer
             ] : null,
             'jobtitle' => ($user->jobtitle) ? e($user->jobtitle) : null,
             'vip' => ($user->vip == '1') ? true : false,
-            'phone' => ($user->phone) ? e($user->phone) : null,
-            'mobile' => ($user->mobile) ? e($user->mobile) : null,
-            'website' => ($user->website) ? e($user->website) : null,
-            'address' => ($user->address) ? e($user->address) : null,
-            'city' => ($user->city) ? e($user->city) : null,
-            'state' => ($user->state) ? e($user->state) : null,
-            'country' => ($user->country) ? e($user->country) : null,
-            'zip' => ($user->zip) ? e($user->zip) : null,
-            'email' => ($user->email) ? e($user->email) : null,
+        ];
+
+        if (auth()->user()->can('manageContactInfo')) {
+            $array += $sensitive_fields;
+        }
+
+
+        $array += [
+
             'department' => ($user->department) ? [
                 'id' => (int) $user->department->id,
                 'name' => e($user->department->name),

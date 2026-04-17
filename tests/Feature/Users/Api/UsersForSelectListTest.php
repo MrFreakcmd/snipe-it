@@ -27,6 +27,18 @@ class UsersForSelectListTest extends TestCase
             ->assertJson(fn (AssertableJson $json) => $json->has('results', 3)->etc());
     }
 
+    public function test_users_cannot_be_searched_by_email_without_permission()
+    {
+        User::factory()->create(['first_name' => 'Luke', 'last_name' => 'Skywalker', 'email' => 'luke@jedis.org']);
+
+        Passport::actingAs(User::factory()->create());
+        $response = $this->getJson(route('api.users.selectlist', ['search' => 'luke@jedis']))->assertOk();
+
+        $results = collect($response->json('results'));
+
+        $this->assertEquals(0, $results->count());
+    }
+
     public function test_users_can_be_searched_by_first_and_last_name()
     {
         User::factory()->create(['first_name' => 'Luke', 'last_name' => 'Skywalker']);
@@ -37,14 +49,14 @@ class UsersForSelectListTest extends TestCase
         $results = collect($response->json('results'));
 
         $this->assertEquals(1, $results->count());
-        $this->assertTrue($results->pluck('text')->contains(fn ($text) => str_contains($text, 'Luke')));
+        $this->assertTrue($results->pluck('text')->contvains(fn($text) => str_contains($text, 'Luke')));
     }
 
     public function test_users_can_be_searched_by_email()
     {
         User::factory()->create(['first_name' => 'Luke', 'last_name' => 'Skywalker', 'email' => 'luke@jedis.org']);
 
-        Passport::actingAs(User::factory()->create());
+        Passport::actingAs(User::factory()->create()->manageContactInfo());
         $response = $this->getJson(route('api.users.selectlist', ['search' => 'luke@jedis']))->assertOk();
 
         $results = collect($response->json('results'));

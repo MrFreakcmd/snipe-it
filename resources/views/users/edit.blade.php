@@ -39,8 +39,7 @@
 
 </style>
 
-<div class="row">
-  <div class="col-md-8 col-md-offset-2">
+<x-container class="col-md-6 col-md-offset-3">
       <form class="form-horizontal" method="post" autocomplete="off"
             action="{{ (isset($user->id)) ? route('users.update', ['user' => $user->id]) : route('users.store') }}"
             enctype="multipart/form-data" id="userForm">
@@ -237,6 +236,7 @@
                           </div>
                   </div>
 
+                  @can('manageContactInfo')
                   <!-- Email -->
                 <div class="form-group {{ $errors->has('email') ? 'has-error' : '' }}">
                   <label class="col-md-3 control-label" for="email">{{ trans('admin/users/table.email') }} </label>
@@ -288,6 +288,7 @@
                           </div>
                       </div> <!--/form-group-->
                   @endif
+                  @endcan
 
                   
                   @include ('partials.forms.edit.image-upload', ['fieldname' => 'avatar', 'image_path' => app('users_upload_path')])
@@ -444,6 +445,9 @@
                               <!-- Location -->
                               @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'location_id'])
 
+
+                              @can('manageContactInfo')
+
                               <!-- Phone -->
                               <div class="form-group {{ $errors->has('phone') ? 'has-error' : '' }}">
                                   <label class="col-md-3 control-label" for="phone">{{ trans('admin/users/table.phone') }}</label>
@@ -453,7 +457,7 @@
                                   </div>
                               </div>
 
-                              <!-- Mobile -->
+                                  <!-- Mobile -->
                               <div class="form-group {{ $errors->has('mobile') ? 'has-error' : '' }}">
                                   <label class="col-md-3 control-label" for="phone">{{ trans('admin/users/table.mobile') }}</label>
                                   <div class="col-md-6">
@@ -521,17 +525,19 @@
                                       {!! $errors->first('zip', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
                                   </div>
                               </div>
+                              @endcan
 
                               <!-- Notes -->
-                              <div class="form-group{!! $errors->has('notes') ? ' has-error' : '' !!}">
-                                  <label for="notes" class="col-md-3 control-label">{{ trans('admin/users/table.notes') }}</label>
-                                  <div class="col-md-6">
-                                      <textarea class="form-control" rows="5" id="notes" name="notes">{{ old('notes', $user->notes) }}</textarea>
-                                      {!! $errors->first('notes', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
-                                  </div>
-                              </div>
+                              <x-form.row
+                                  :label="trans('general.notes')"
+                                  :item="$user"
+                                  name="notes"
+                                  type="textarea"
+                                  placeholder="{{ trans('general.placeholders.notes') }}"
+                              />
 
-                              @if ($snipeSettings->two_factor_enabled!='')
+
+                          @if ($snipeSettings->two_factor_enabled!='')
                                   @if ($snipeSettings->two_factor_enabled=='1')
                                       <div class="form-group">
                                           <div class="col-md-9 col-md-offset-3">
@@ -583,7 +589,7 @@
                                   <label class="col-md-3 control-label" for="groups[]">
                                       {{ trans('general.groups') }}
                                   </label>
-                                  <div class="col-md-6">
+                                  <div class="col-md-8">
 
                                       @if ($groups->count())
                                           @if ((!Gate::allows('editableOnDemo') || (!Auth::user()->isSuperUser())))
@@ -675,8 +681,7 @@
           />
       </div><!-- nav-tabs-custom -->
     </form>
-  </div> <!--/col-md-8-->
-</div><!--/row-->
+</x-container>
 @stop
 
 @section('moar_scripts')

@@ -125,7 +125,11 @@ class UserPresenter extends Presenter
                 'title' => trans('admin/users/general.remote'),
                 'visible' => false,
                 'formatter' => 'trueFalseFormatter',
-            ],
+            ]
+        ];
+
+
+        $sensitive_fields = [
             [
                 'field' => 'email',
                 'searchable' => true,
@@ -201,9 +205,18 @@ class UserPresenter extends Presenter
                 'switchable' => true,
                 'title' => trans('general.zip'),
                 'visible' => false,
-            ],
+            ]
+        ];
 
-            [
+        // Add the sensitive fields in if the user can see them
+        if (auth()->user()->can('manageContactInfo')) {
+            foreach ($sensitive_fields as $sensitive_field) {
+                array_push($layout, $sensitive_field);
+            }
+        }
+
+
+        array_push($layout, [
                 'field' => 'locale',
                 'searchable' => true,
                 'sortable' => true,
@@ -432,7 +445,8 @@ class UserPresenter extends Presenter
                 'printIgnore' => true,
                 'class' => 'hidden-print',
             ],
-        ];
+        );
+
 
         return json_encode($layout);
     }
