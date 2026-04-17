@@ -45,6 +45,18 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     use Searchable;
     use UniqueUndeletedTrait;
 
+    public const SENSITIVE_CONTACT_FIELDS = [
+        'email',
+        'phone',
+        'mobile',
+        'website',
+        'address',
+        'city',
+        'state',
+        'country',
+        'zip',
+    ];
+
     protected $hidden = [
         'password',
         'remember_token',
@@ -1264,19 +1276,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
 
     protected function canApplyStructuredFilterToAttribute(string $attribute): bool
     {
-        $contactAttributes = [
-            'email',
-            'phone',
-            'mobile',
-            'address',
-            'city',
-            'state',
-            'country',
-            'zip',
-            'website',
-        ];
-
-        if (! in_array($attribute, $contactAttributes, true)) {
+        if (! in_array($attribute, self::SENSITIVE_CONTACT_FIELDS, true)) {
             return true;
         }
 

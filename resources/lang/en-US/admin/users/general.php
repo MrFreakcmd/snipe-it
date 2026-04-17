@@ -57,6 +57,7 @@ return [
     'all_assigned_list_generation' => 'Generated on:',
     'email_user_creds_on_create' => 'Email this user their credentials?',
     'department_manager' => 'Department Manager',
+    'import_contact_fields_permission_warning' => 'You do not have permission to import user contact fields (email, phone, mobile, website, or address details). Those columns will be ignored if they are included in this import.',
     'generate_password' => 'Generate random password',
     'individual_override' => 'This user has at least one individual permission set, which may override group permissions.',
 ];

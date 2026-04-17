@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\CustomField;
 use App\Models\Import;
+use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -720,6 +721,16 @@ class Importer extends Component
     {
         $this->message = null;
         $this->message_type = null;
+    }
+
+    #[Computed]
+    public function showUserImportContactWarning(): bool
+    {
+        if ($this->typeOfImport !== 'user') {
+            return false;
+        }
+
+        return auth()->user()?->cannot('manageContactInfo', User::class) ?? false;
     }
 
     #[Computed]

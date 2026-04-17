@@ -199,6 +199,13 @@
                                                                             {{ trans('general.auto_incrementing_asset_tags_disabled_so_tags_required') }}
                                                                         </p>
                                                                     @endif
+
+                                                                @if($this->showUserImportContactWarning)
+                                                                    <p class="text-warning">
+                                                                        <x-icon type="warning" class="fa-fw"/>
+                                                                        {{ trans('admin/users/general.import_contact_fields_permission_warning') }}
+                                                                    </p>
+                                                                @endif
                                                                 </div>
                                                             </div>
 

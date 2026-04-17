@@ -74,6 +74,7 @@ class UserImporter extends ItemImporter
         $this->item['autoassign_licenses'] = ($this->fetchHumanBoolean(trim($this->findCsvMatch($row, 'autoassign_licenses'))) == 1) ? '1' : 0;
 
         $this->handleEmptyStringsForDates();
+        $this->stripSensitiveContactFieldsWhenUnauthorized();
 
         $user_department = trim($this->findCsvMatch($row, 'department'));
         if ($this->shouldUpdateField($user_department)) {
@@ -219,5 +220,30 @@ class UserImporter extends ItemImporter
         if ($this->item['end_date'] === '') {
             $this->item['end_date'] = null;
         }
+    }
+
+    private function stripSensitiveContactFieldsWhenUnauthorized(): void
+    {
+        if (! $this->shouldRestrictSensitiveContactFields()) {
+            return;
+        }
+
+        foreach (User::SENSITIVE_CONTACT_FIELDS as $field) {
+            unset($this->item[$field]);
+        }
+    }
+
+    private function shouldRestrictSensitiveContactFields(): bool
+    {
+        // True CLI imports (no authenticated user) are intentionally trusted.
+        if (app()->runningInConsole() && ! Auth::check()) {
+            return false;
+        }
+
+        if (! Auth::check()) {
+            return true;
+        }
+
+        return ! Gate::allows('manageContactInfo', User::class);
     }
 }
