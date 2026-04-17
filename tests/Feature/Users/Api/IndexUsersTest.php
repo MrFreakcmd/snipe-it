@@ -97,4 +97,22 @@ class IndexUsersTest extends TestCase
             ])
             ->assertJson(fn (AssertableJson $json) => $json->has('rows', 0)->etc());
     }
+
+    public function test_contact_only_structured_filter_returns_no_results_without_contact_permission(): void
+    {
+        User::factory()->create([
+            'email' => 'contact-only-filter@example.org',
+        ]);
+
+        $this->actingAsForApi(User::factory()->viewUsers()->create())
+            ->getJson(route('api.users.index', [
+                'filter' => '{"email":"contact-only-filter@example.org"}',
+            ]))
+            ->assertOk()
+            ->assertJsonStructure([
+                'total',
+                'rows',
+            ])
+            ->assertJson(fn (AssertableJson $json) => $json->has('rows', 0)->etc());
+    }
 }
