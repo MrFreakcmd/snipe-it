@@ -117,7 +117,7 @@ return [
 
     'usersfiles' => [
         'name' => 'Manage User Files',
-        'note' => 'Allows the user to view, upload, download, and delete files associated with users.',
+        'note' => 'Allows the user to view, upload, download, and delete files associated with users. (This only makes sense with view privileges or higher.) Keep in mind that some uploaded user files might contain personal information that should be protected, so only grant this permission to trusted users.',
     ],
 
     'userscontact' => [
