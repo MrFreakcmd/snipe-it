@@ -108,4 +108,62 @@ class ActivityReportTest extends TestCase
             ->assertJson(fn (AssertableJson $json) => $json->has('rows', 7)->etc());
 
     }
+
+    public function test_activity_search_does_not_match_sensitive_contact_meta_without_permission(): void
+    {
+        $subject = User::factory()->create();
+        $actor = User::factory()->viewUsers()->create();
+        $oldPhone = '555-123-0000';
+
+        Actionlog::factory()->create([
+            'item_id' => $subject->id,
+            'item_type' => User::class,
+            'target_id' => $subject->id,
+            'target_type' => User::class,
+            'created_by' => $actor->id,
+            'action_type' => 'update',
+            'log_meta' => json_encode([
+                'phone' => ['old' => $oldPhone, 'new' => '555-321-0000'],
+            ]),
+        ]);
+
+        $this->actingAsForApi($actor)
+            ->getJson(route('api.activity.index', [
+                'target_type' => 'user',
+                'target_id' => $subject->id,
+                'search' => $oldPhone,
+            ]))
+            ->assertOk()
+            ->assertJsonPath('total', 0)
+            ->assertJsonCount(0, 'rows');
+    }
+
+    public function test_activity_search_matches_sensitive_contact_meta_with_permission(): void
+    {
+        $subject = User::factory()->create();
+        $actor = User::factory()->viewUsers()->manageContactInfo()->create();
+        $oldPhone = '555-123-4444';
+
+        Actionlog::factory()->create([
+            'item_id' => $subject->id,
+            'item_type' => User::class,
+            'target_id' => $subject->id,
+            'target_type' => User::class,
+            'created_by' => $actor->id,
+            'action_type' => 'update',
+            'log_meta' => json_encode([
+                'phone' => ['old' => $oldPhone, 'new' => '555-321-4444'],
+            ]),
+        ]);
+
+        $this->actingAsForApi($actor)
+            ->getJson(route('api.activity.index', [
+                'target_type' => 'user',
+                'target_id' => $subject->id,
+                'search' => $oldPhone,
+            ]))
+            ->assertOk()
+            ->assertJsonPath('total', 1)
+            ->assertJsonCount(1, 'rows');
+    }
 }

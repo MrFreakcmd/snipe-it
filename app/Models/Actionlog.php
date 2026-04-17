@@ -104,6 +104,15 @@ class Actionlog extends SnipeModel
         'accessories.supplier' => ['name', 'notes'],
     ];
 
+    protected function canApplyStructuredFilterToAttribute(string $attribute): bool
+    {
+        if ($attribute !== 'log_meta') {
+            return true;
+        }
+
+        return auth()->user()?->can('manageContactInfo', User::class) ?? false;
+    }
+
     /**
      * Override from Builder to automatically add the company
      *

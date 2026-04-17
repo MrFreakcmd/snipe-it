@@ -570,4 +570,62 @@ class IndexHistoryTest extends TestCase
         $this->assertArrayHasKey('phone', $logMeta);
         $this->assertArrayHasKey('first_name', $logMeta);
     }
+
+    public function test_user_history_search_does_not_match_sensitive_contact_meta_without_permission()
+    {
+        $subject = User::factory()->create();
+        $actor = User::factory()->viewUserHistory()->create();
+        $oldPhone = '555-000-1212';
+
+        Actionlog::factory()->create([
+            'item_id' => $subject->id,
+            'item_type' => User::class,
+            'target_id' => $subject->id,
+            'target_type' => User::class,
+            'created_by' => $actor->id,
+            'action_type' => 'update',
+            'note' => 'history-search-sensitive-meta',
+            'log_meta' => json_encode([
+                'phone' => ['old' => $oldPhone, 'new' => '555-111-2222'],
+            ]),
+        ]);
+
+        $this->actingAsForApi($actor)
+            ->getJson(route('api.users.history', [
+                'user' => $subject,
+                'search' => $oldPhone,
+            ]))
+            ->assertOk()
+            ->assertJsonPath('total', 0)
+            ->assertJsonCount(0, 'rows');
+    }
+
+    public function test_user_history_search_matches_sensitive_contact_meta_with_permission()
+    {
+        $subject = User::factory()->create();
+        $actor = User::factory()->viewUserHistory()->manageContactInfo()->create();
+        $oldPhone = '555-000-3434';
+
+        Actionlog::factory()->create([
+            'item_id' => $subject->id,
+            'item_type' => User::class,
+            'target_id' => $subject->id,
+            'target_type' => User::class,
+            'created_by' => $actor->id,
+            'action_type' => 'update',
+            'note' => 'history-search-sensitive-meta-allowed',
+            'log_meta' => json_encode([
+                'phone' => ['old' => $oldPhone, 'new' => '555-777-8888'],
+            ]),
+        ]);
+
+        $this->actingAsForApi($actor)
+            ->getJson(route('api.users.history', [
+                'user' => $subject,
+                'search' => $oldPhone,
+            ]))
+            ->assertOk()
+            ->assertJsonPath('total', 1)
+            ->assertJsonCount(1, 'rows');
+    }
 }
