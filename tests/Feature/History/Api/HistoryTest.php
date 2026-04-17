@@ -498,4 +498,76 @@ class IndexHistoryTest extends TestCase
         $this->assertLessThan(45, $queryCount, 'History endpoint query count regressed and may have reintroduced N+1 behavior.');
         $this->assertCount(30, $response->json('rows'));
     }
+
+    public function test_user_history_hides_sensitive_contact_fields_in_log_meta_without_permission()
+    {
+        $subject = User::factory()->create();
+        $actor = User::factory()->viewUserHistory()->create();
+        $uniqueNote = 'history-hide-contact-meta-'.uniqid();
+
+        Actionlog::factory()->create([
+            'item_id' => $subject->id,
+            'item_type' => User::class,
+            'target_id' => $subject->id,
+            'target_type' => User::class,
+            'created_by' => $actor->id,
+            'action_type' => 'update',
+            'note' => $uniqueNote,
+            'log_meta' => json_encode([
+                'email' => ['old' => 'old@example.test', 'new' => 'new@example.test'],
+                'phone' => ['old' => '111', 'new' => '222'],
+                'first_name' => ['old' => 'Old', 'new' => 'New'],
+            ]),
+        ]);
+
+        $response = $this->actingAsForApi($actor)
+            ->getJson(route('api.users.history', [
+                'user' => $subject,
+                'search' => $uniqueNote,
+            ]))
+            ->assertOk();
+
+        $logMeta = $response->json('rows.0.log_meta');
+
+        $this->assertIsArray($logMeta);
+        $this->assertArrayNotHasKey('email', $logMeta);
+        $this->assertArrayNotHasKey('phone', $logMeta);
+        $this->assertArrayHasKey('first_name', $logMeta);
+    }
+
+    public function test_user_history_shows_sensitive_contact_fields_in_log_meta_with_permission()
+    {
+        $subject = User::factory()->create();
+        $actor = User::factory()->viewUserHistory()->manageContactInfo()->create();
+        $uniqueNote = 'history-show-contact-meta-'.uniqid();
+
+        Actionlog::factory()->create([
+            'item_id' => $subject->id,
+            'item_type' => User::class,
+            'target_id' => $subject->id,
+            'target_type' => User::class,
+            'created_by' => $actor->id,
+            'action_type' => 'update',
+            'note' => $uniqueNote,
+            'log_meta' => json_encode([
+                'email' => ['old' => 'old@example.test', 'new' => 'new@example.test'],
+                'phone' => ['old' => '111', 'new' => '222'],
+                'first_name' => ['old' => 'Old', 'new' => 'New'],
+            ]),
+        ]);
+
+        $response = $this->actingAsForApi($actor)
+            ->getJson(route('api.users.history', [
+                'user' => $subject,
+                'search' => $uniqueNote,
+            ]))
+            ->assertOk();
+
+        $logMeta = $response->json('rows.0.log_meta');
+
+        $this->assertIsArray($logMeta);
+        $this->assertArrayHasKey('email', $logMeta);
+        $this->assertArrayHasKey('phone', $logMeta);
+        $this->assertArrayHasKey('first_name', $logMeta);
+    }
 }

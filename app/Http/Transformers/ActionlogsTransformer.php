@@ -14,6 +14,7 @@ use App\Models\Location;
 use App\Models\Setting;
 use App\Models\Statuslabel;
 use App\Models\Supplier;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Gate;
@@ -22,6 +23,18 @@ use Illuminate\Support\Facades\Storage;
 
 class ActionlogsTransformer
 {
+    private const CONTACT_INFO_META_FIELDS = [
+        'email',
+        'phone',
+        'mobile',
+        'address',
+        'city',
+        'state',
+        'zip',
+        'country',
+        'website',
+    ];
+
     public function transformActionlogs(Collection $actionlogs, $total)
     {
         $array = [];
@@ -74,6 +87,10 @@ class ActionlogsTransformer
             if ($meta_array) {
 
                 foreach ($meta_array as $fieldname => $fieldata) {
+
+                    if ($this->shouldHideSensitiveMetaField($fieldname)) {
+                        continue;
+                    }
 
                     $clean_meta[$fieldname]['old'] = $this->clean_field($fieldata->old);
                     $clean_meta[$fieldname]['new'] = $this->clean_field($fieldata->new);
@@ -347,5 +364,14 @@ class ActionlogsTransformer
         }
 
         return (int) $actionlog->quantity;
+    }
+
+    private function shouldHideSensitiveMetaField(string $fieldName): bool
+    {
+        if (! in_array($fieldName, self::CONTACT_INFO_META_FIELDS, true)) {
+            return false;
+        }
+
+        return ! auth()->user()?->can('manageContactInfo', User::class);
     }
 }

@@ -150,7 +150,7 @@ class UsersController extends Controller
             ];
 
         // Do not even request these fields if the requesting user cannot manage user contact info
-        if (auth()->user()->can('manageContactInfo')) {
+        if (auth()->user()->can('manageContactInfo', User::class)) {
             array_push($allowed_columns,
                 'address',
                 'city',
@@ -186,7 +186,7 @@ class UsersController extends Controller
         }
 
         // Check that the user can view contact info
-        if (auth()->user()->can('manageContactInfo')) {
+        if (auth()->user()->can('manageContactInfo', User::class)) {
 
             if ($request->filled('address')) {
                 $users = $users->where('users.address', '=', $request->input('address'));
@@ -391,7 +391,7 @@ class UsersController extends Controller
             'users.avatar',
         ];
 
-        if (auth()->user()->can('manageContactInfo')) {
+        if (auth()->user()->can('manageContactInfo', User::class)) {
             array_push($select_array, 'users.email');
         }
 
@@ -403,7 +403,7 @@ class UsersController extends Controller
                 $query->SimpleNameSearch($request->input('search'));
 
                 // Check that the requesting user can search against the email field
-                if (auth()->user()->can('manageContactInfo')) {
+                if (auth()->user()->can('manageContactInfo', User::class)) {
                     $query->orWhere('users.email', 'LIKE', '%'.$request->input('search').'%');
                 }
 
@@ -557,7 +557,7 @@ class UsersController extends Controller
             'username',
         ]));
 
-        if (auth()->user()->cannot('manageContactInfo')) {
+        if (auth()->user()->cannot('manageContactInfo', User::class)) {
             $request->request->remove('address');
             $request->request->remove('city');
             $request->request->remove('country');

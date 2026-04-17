@@ -107,7 +107,7 @@ class UsersController extends Controller
         $authenticatedUser = auth()->user();
         $user = new User;
 
-        if (auth()->user()->can('manageContactInfo')) {
+        if (auth()->user()->can('manageContactInfo', User::class)) {
             $user->address = $request->input('address', null);
             $user->city = $request->input('city', null);
             $user->country = $request->input('country', null);
@@ -268,7 +268,7 @@ class UsersController extends Controller
         // Update the user fields
 
         // Check that the user can update contact info, but skip email, since we have to do an additional check below for that
-        if (auth()->user()->can('manageContactInfo')) {
+        if (auth()->user()->can('manageContactInfo', User::class)) {
             $user->address = $request->input('address', null);
             $user->city = $request->input('city', null);
             $user->country = $request->input('country', null);
@@ -553,7 +553,7 @@ class UsersController extends Controller
                 trans('admin/users/table.display_name'),
             ];
 
-            if (auth()->user()->can('manageContactInfo')) {
+            if (auth()->user()->can('manageContactInfo', User::class)) {
                 array_push($headers,
                     trans('admin/users/table.email'),
                     trans('admin/users/table.phone'),
@@ -649,7 +649,7 @@ class UsersController extends Controller
                             $user->getRawOriginal('display_name'),
                         ];
 
-                        if (auth()->user()->can('manageContactInfo')) {
+                        if (auth()->user()->can('manageContactInfo', User::class)) {
 
                             array_push($values,
                                 $user->email,

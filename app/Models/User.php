@@ -223,56 +223,56 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     protected function address(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo')) ? $value : null,
+            get: fn (mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo', User::class)) ? $value : null,
         );
     }
 
     protected function city(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo')) ? $value : null,
+            get: fn (mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo', User::class)) ? $value : null,
         );
     }
 
     protected function state(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo')) ? $value : null,
+            get: fn (mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo', User::class)) ? $value : null,
         );
     }
 
     protected function country(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo')) ? $value : null,
+            get: fn (mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo', User::class)) ? $value : null,
         );
     }
 
     protected function zip(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo')) ? $value : null,
+            get: fn (mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo', User::class)) ? $value : null,
         );
     }
 
     protected function phone(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo')) ? $value : null,
+            get: fn (mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo', User::class)) ? $value : null,
         );
     }
 
     protected function mobile(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo')) ? $value : null,
+            get: fn (mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo', User::class)) ? $value : null,
         );
     }
 
     protected function website(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo')) ? $value : null,
+            get: fn (mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo', User::class)) ? $value : null,
         );
     }
 

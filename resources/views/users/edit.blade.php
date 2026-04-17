@@ -236,7 +236,7 @@
                           </div>
                   </div>
 
-                  @can('manageContactInfo')
+                  @can('manageContactInfo', \App\Models\User::class)
                   <!-- Email -->
                 <div class="form-group {{ $errors->has('email') ? 'has-error' : '' }}">
                   <label class="col-md-3 control-label" for="email">{{ trans('admin/users/table.email') }} </label>
@@ -446,7 +446,7 @@
                               @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'location_id'])
 
 
-                              @can('manageContactInfo')
+                              @can('manageContactInfo', \App\Models\User::class)
 
                               <!-- Phone -->
                               <div class="form-group {{ $errors->has('phone') ? 'has-error' : '' }}">

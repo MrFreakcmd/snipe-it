@@ -2,6 +2,7 @@
 
 namespace App\Presenters;
 
+use App\Models\User;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Storage;
 
@@ -208,7 +209,7 @@ class UserPresenter extends Presenter
         ];
 
         // Add the sensitive fields in if the user can see them
-        if (auth()->user()->can('manageContactInfo')) {
+        if (auth()->user()->can('manageContactInfo', User::class)) {
             foreach ($sensitive_fields as $sensitive_field) {
                 array_push($layout, $sensitive_field);
             }

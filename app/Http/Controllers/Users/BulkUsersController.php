@@ -179,7 +179,7 @@ class BulkUsersController extends Controller
             ->conditionallyAddItem('autoassign_licenses');
 
         // Check that the user can manage contact info for users
-        if (auth()->user()->can('manageContactInfo')) {
+        if (auth()->user()->can('manageContactInfo', User::class)) {
             $this->conditionallyAddItem('city')
                 ->conditionallyAddItem('state')
                 ->conditionallyAddItem('country')

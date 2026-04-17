@@ -59,7 +59,7 @@ class UsersTransformer
             'vip' => ($user->vip == '1') ? true : false,
         ];
 
-        if (auth()->user()->can('manageContactInfo')) {
+        if (auth()->user()->can('manageContactInfo', User::class)) {
             $array += $sensitive_fields;
         }
 
