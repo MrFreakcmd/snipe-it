@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Helper;
-use App\Http\Transformers\ActionlogsTransformer;
 use App\Http\Requests\CustomAssetReportRequest;
+use App\Http\Transformers\ActionlogsTransformer;
 use App\Mail\CheckoutAccessoryMail;
 use App\Mail\CheckoutAssetMail;
 use App\Mail\CheckoutComponentMail;

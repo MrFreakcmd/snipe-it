@@ -271,7 +271,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     protected function email(): Attribute
     {
         return Attribute::make(
-            get: fn(mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo', User::class)) ? $value : null,
+            get: fn (mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo', User::class)) ? $value : null,
         );
     }
 
@@ -1234,15 +1234,15 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
             );
 
             if (auth()->user()?->can('manageContactInfo', User::class)) {
-                $query->orWhere('users.email', 'LIKE', '%' . $term . '%')
-                    ->orWhere('users.phone', 'LIKE', '%' . $term . '%')
-                    ->orWhere('users.mobile', 'LIKE', '%' . $term . '%')
-                    ->orWhere('users.address', 'LIKE', '%' . $term . '%')
-                    ->orWhere('users.city', 'LIKE', '%' . $term . '%')
-                    ->orWhere('users.state', 'LIKE', '%' . $term . '%')
-                    ->orWhere('users.country', 'LIKE', '%' . $term . '%')
-                    ->orWhere('users.zip', 'LIKE', '%' . $term . '%')
-                    ->orWhere('users.website', 'LIKE', '%' . $term . '%');
+                $query->orWhere('users.email', 'LIKE', '%'.$term.'%')
+                    ->orWhere('users.phone', 'LIKE', '%'.$term.'%')
+                    ->orWhere('users.mobile', 'LIKE', '%'.$term.'%')
+                    ->orWhere('users.address', 'LIKE', '%'.$term.'%')
+                    ->orWhere('users.city', 'LIKE', '%'.$term.'%')
+                    ->orWhere('users.state', 'LIKE', '%'.$term.'%')
+                    ->orWhere('users.country', 'LIKE', '%'.$term.'%')
+                    ->orWhere('users.zip', 'LIKE', '%'.$term.'%')
+                    ->orWhere('users.website', 'LIKE', '%'.$term.'%');
             }
         }
 

@@ -62,4 +62,3 @@ return new class extends Migration
         return in_array($permissionValue, [1, '1', true], true);
     }
 };
-

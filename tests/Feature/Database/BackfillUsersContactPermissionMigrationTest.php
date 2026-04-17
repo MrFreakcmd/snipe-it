@@ -4,6 +4,7 @@ namespace Tests\Feature\Database;
 
 use App\Models\Group;
 use App\Models\User;
+use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
@@ -68,7 +69,7 @@ class BackfillUsersContactPermissionMigrationTest extends TestCase
 
     private function runBackfillMigration(): void
     {
-        /** @var \Illuminate\Database\Migrations\Migration $migration */
+        /** @var Migration $migration */
         $migration = require database_path('migrations/2026_04_17_120000_backfill_users_contact_permission_from_users_edit.php');
         $migration->up();
     }
@@ -87,4 +88,3 @@ class BackfillUsersContactPermissionMigrationTest extends TestCase
         return is_array($permissions) ? ($permissions[$permission] ?? null) : null;
     }
 }
-
