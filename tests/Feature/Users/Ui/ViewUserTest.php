@@ -80,4 +80,37 @@ class ViewUserTest extends TestCase
             ->assertSee('reports.view')
             ->assertSee('label-danger', false);
     }
+
+    public function test_hides_email_when_actor_lacks_contact_permission(): void
+    {
+        $actor = User::factory()->viewUsers()->create();
+        $target = User::factory()->create(['email' => 'hidden@example.com']);
+
+        $this->actingAs($actor)
+            ->get(route('users.show', $target))
+            ->assertOk()
+            ->assertDontSee('hidden@example.com');
+    }
+
+    public function test_shows_email_when_actor_has_contact_permission(): void
+    {
+        $actor = User::factory()->viewUsers()->manageContactInfo()->create();
+        $target = User::factory()->create(['email' => 'visible@example.com']);
+
+        $this->actingAs($actor)
+            ->get(route('users.show', $target))
+            ->assertOk()
+            ->assertSee('visible@example.com');
+    }
+
+    public function test_superuser_can_see_email_on_user_view(): void
+    {
+        $actor = User::factory()->superuser()->create();
+        $target = User::factory()->create(['email' => 'super@example.com']);
+
+        $this->actingAs($actor)
+            ->get(route('users.show', $target))
+            ->assertOk()
+            ->assertSee('super@example.com');
+    }
 }
