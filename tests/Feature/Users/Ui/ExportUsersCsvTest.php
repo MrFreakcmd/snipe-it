@@ -73,4 +73,3 @@ class ExportUsersCsvTest extends TestCase
         $this->assertSame('', $targetRow[$departmentManagerHeader]);
     }
 }
-
