@@ -355,6 +355,11 @@ class UserFactory extends Factory
         return $this->appendPermission(['users.edit' => '1']);
     }
 
+    public function manageContactInfo()
+    {
+        return $this->appendPermission(['users.contact' => '1']);
+    }
+
     public function deleteUsers()
     {
         return $this->appendPermission(['users.delete' => '1']);
