@@ -72,4 +72,25 @@ class ExportUsersCsvTest extends TestCase
         $this->assertSame('', $targetRow[$departmentHeader]);
         $this->assertSame('', $targetRow[$departmentManagerHeader]);
     }
+
+    public function test_header_row_is_not_repeated_when_export_spans_multiple_chunks(): void
+    {
+        $actor = User::factory()->viewUsers()->create();
+        User::factory()->count(505)->create();
+
+        $response = $this->actingAs($actor)
+            ->get(route('users.export'))
+            ->assertOk();
+
+        $rows = collect(Reader::createFromString($response->streamedContent())->getRecords());
+
+        $headerId = strtolower(trans('general.id'));
+        $headerCompany = trans('admin/companies/table.title');
+
+        $headerOccurrences = $rows->filter(static function (array $row) use ($headerId, $headerCompany): bool {
+            return (($row[0] ?? null) === $headerId) && (($row[1] ?? null) === $headerCompany);
+        })->count();
+
+        $this->assertSame(1, $headerOccurrences);
+    }
 }

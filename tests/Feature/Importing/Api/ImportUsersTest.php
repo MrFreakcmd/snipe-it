@@ -349,4 +349,48 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
         $this->assertNull($newUser->reset_password_code);
         $this->assertEquals(0, $newUser->activated);
     }
+
+    #[Test]
+    public function import_user_skips_sensitive_contact_fields_without_manage_contact_permission(): void
+    {
+        $importFileBuilder = ImportFileBuilder::new();
+        $row = $importFileBuilder->firstRow();
+        $import = Import::factory()->users()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
+
+        $this->actingAsForApi(User::factory()->canImport()->create());
+        $this->importFileResponse(['import' => $import->id])->assertOk();
+
+        $newUser = User::query()
+            ->where('username', $row['username'])
+            ->sole();
+
+        $this->assertEmpty($newUser->getRawOriginal('email'));
+        $this->assertEmpty($newUser->getRawOriginal('phone'));
+    }
+
+    #[Test]
+    public function update_user_import_skips_sensitive_contact_fields_without_manage_contact_permission(): void
+    {
+        $user = User::factory()->create([
+            'username' => Str::random(),
+            'email' => 'original-import-user@example.test',
+            'phone' => '+1-555-0100',
+        ]);
+
+        $importFileBuilder = ImportFileBuilder::new([
+            'username' => $user->username,
+            'email' => 'updated-import-user@example.test',
+            'phoneNumber' => '+1-555-9999',
+        ]);
+
+        $import = Import::factory()->users()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
+
+        $this->actingAsForApi(User::factory()->canImport()->create());
+        $this->importFileResponse(['import' => $import->id, 'import-update' => true])->assertOk();
+
+        $updatedUser = User::query()->findOrFail($user->id);
+
+        $this->assertSame('original-import-user@example.test', $updatedUser->getRawOriginal('email'));
+        $this->assertSame('+1-555-0100', $updatedUser->getRawOriginal('phone'));
+    }
 }
