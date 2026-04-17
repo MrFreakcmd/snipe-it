@@ -49,7 +49,7 @@ class UsersForSelectListTest extends TestCase
         $results = collect($response->json('results'));
 
         $this->assertEquals(1, $results->count());
-        $this->assertTrue($results->pluck('text')->contains(fn($text) => str_contains($text, 'Luke')));
+        $this->assertTrue($results->pluck('text')->contains(fn ($text) => str_contains($text, 'Luke')));
     }
 
     public function test_users_can_be_searched_by_email()
