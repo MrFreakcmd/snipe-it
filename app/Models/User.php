@@ -270,10 +270,12 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         );
     }
 
-    protected function website(): Attribute
+    protected function url(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value) => (auth()->user() && auth()->user()->can('manageContactInfo', User::class)) ? $value : null,
+            get: fn(mixed $value, array $attributes) => (auth()->user()?->can('manageContactInfo', User::class))
+                ? ($attributes['website'] ?? $value)
+                : null,
         );
     }
 
