@@ -2,8 +2,8 @@
 
 namespace App\Presenters;
 
-use App\Models\User;
 use App\Models\Setting;
+use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 
 /**
