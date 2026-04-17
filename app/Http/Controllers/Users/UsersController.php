@@ -601,6 +601,8 @@ class UsersController extends Controller
                 trans('general.created_by'),
             );
 
+            fputcsv($handle, $headers);
+
             $users = User::with(
                 'assets',
                 'accessories',
@@ -621,9 +623,7 @@ class UsersController extends Controller
                 'managesUsers as manages_users_count',
                 'managedLocations as manages_locations_count',
             ])->orderBy('created_at', 'DESC')
-                ->chunk(500, function ($users) use ($handle, $headers) {
-
-                    fputcsv($handle, $headers);
+                ->chunk(500, function ($users) use ($handle) {
 
                     foreach ($users as $user) {
                         $user_groups = '';
