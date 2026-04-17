@@ -354,7 +354,6 @@ class ReportsController extends Controller
         return view('reports/licenses', compact('licenses'));
     }
 
-
     /**
      * Exports the licenses to CSV
      *
