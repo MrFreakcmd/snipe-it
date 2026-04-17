@@ -312,11 +312,11 @@
             </x-info-element>
         @endif
 
-        @if ($infoPanelObj->email)
+        @if ($infoPanelObj->display_email)
             <x-info-element icon_type="email" title="{{ trans('general.email') }}">
                 <x-copy-to-clipboard class="pull-right" copy_what="email">
                     <x-info-element.email title="{{ trans('general.email') }}">
-                        {{ $infoPanelObj->email }}
+                        {{ $infoPanelObj->display_email }}
                     </x-info-element.email>
                 </x-copy-to-clipboard>
             </x-info-element>
