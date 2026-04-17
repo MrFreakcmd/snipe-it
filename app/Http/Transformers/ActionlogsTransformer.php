@@ -65,6 +65,8 @@ class ActionlogsTransformer
 
     public function transformActionlog(Actionlog $actionlog, $settings = null)
     {
+        $settings ??= Setting::getSettings();
+        $auditInterval = $this->normalizeAuditInterval(data_get($settings, 'audit_interval'));
 
         $icon = $actionlog->present()->icon();
 
@@ -180,8 +182,8 @@ class ActionlogsTransformer
             ] : null,
             'created_at' => Helper::getFormattedDateObject($actionlog->created_at, 'datetime'),
             'updated_at' => Helper::getFormattedDateObject($actionlog->updated_at, 'datetime'),
-            'next_audit_date' => ($actionlog->itemType() == 'asset') ? Helper::getFormattedDateObject($actionlog->calcNextAuditDate(null, $actionlog->item), 'date') : null,
-            'days_to_next_audit' => $actionlog->daysUntilNextAudit($settings->audit_interval, $actionlog->item),
+            'next_audit_date' => $this->getNextAuditDate($actionlog, $auditInterval),
+            'days_to_next_audit' => $this->getDaysToNextAudit($actionlog, $auditInterval),
             'action_type' => $actionlog->present()->actionType(),
             'admin' => ($actionlog->adminuser) ? [
                 'id' => (int) $actionlog->adminuser->id,
@@ -373,5 +375,42 @@ class ActionlogsTransformer
         }
 
         return ! auth()->user()?->can('manageContactInfo', User::class);
+    }
+
+    private function normalizeAuditInterval(mixed $auditInterval): ?int
+    {
+        if (! is_numeric($auditInterval)) {
+            return null;
+        }
+
+        $normalized = (int) $auditInterval;
+
+        return $normalized > 0 ? $normalized : null;
+    }
+
+    private function getNextAuditDate(Actionlog $actionlog, ?int $auditInterval): mixed
+    {
+        if ($actionlog->itemType() !== 'asset' || ! $actionlog->item instanceof Asset) {
+            return null;
+        }
+
+        if (! $actionlog->item->next_audit_date && $auditInterval === null) {
+            return null;
+        }
+
+        return Helper::getFormattedDateObject($actionlog->calcNextAuditDate($auditInterval, $actionlog->item), 'date');
+    }
+
+    private function getDaysToNextAudit(Actionlog $actionlog, ?int $auditInterval): ?int
+    {
+        if (! $actionlog->item instanceof Asset) {
+            return null;
+        }
+
+        if (! $actionlog->item->next_audit_date && $auditInterval === null) {
+            return null;
+        }
+
+        return $actionlog->daysUntilNextAudit($auditInterval, $actionlog->item);
     }
 }

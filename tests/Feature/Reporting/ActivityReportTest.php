@@ -6,6 +6,7 @@ use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\Company;
 use App\Models\User;
+use App\Http\Transformers\ActionlogsTransformer;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\TestCase;
 
@@ -165,5 +166,27 @@ class ActivityReportTest extends TestCase
             ->assertOk()
             ->assertJsonPath('total', 1)
             ->assertJsonCount(1, 'rows');
+    }
+
+    public function test_actionlog_transformer_handles_missing_or_empty_settings(): void
+    {
+        $actor = User::factory()->create();
+        $subject = User::factory()->create();
+
+        $log = Actionlog::factory()->userUpdated()->create([
+            'created_by' => $actor->id,
+            'item_id' => $subject->id,
+            'item_type' => User::class,
+            'target_id' => $subject->id,
+            'target_type' => User::class,
+        ]);
+
+        $transformer = new ActionlogsTransformer;
+
+        $withNullSettings = $transformer->transformActionlog($log, null);
+        $withEmptySettingsObject = $transformer->transformActionlog($log, (object) []);
+
+        $this->assertArrayHasKey('days_to_next_audit', $withNullSettings);
+        $this->assertArrayHasKey('days_to_next_audit', $withEmptySettingsObject);
     }
 }
