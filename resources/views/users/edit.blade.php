@@ -607,7 +607,7 @@
                                                         size="{{ ($groups->count() > 25) ? '25' : '10' }}"
                                                         aria-label="groups[]"
                                                         id="groups[]"
-                                                        multiple="multiple"
+                                                        multiple
                                                         class="form-control">
 
                                                     @foreach ($groups as $id => $group)

@@ -212,10 +212,6 @@
         input[type="email"],
         input[type="password"],
         input[type="tel"],
-        option:active,
-        option[active],
-        option[selected],
-        select option,
         select,
         textarea
         {
@@ -223,6 +219,12 @@
             color: var(--color-fg) !important;
             border-color: var(--input-border-color) !important;
 
+        }
+
+        option:active,
+        option[active] {
+            background-color: var(--input-border-color) !important;
+            color: var(--nav-primary-text-color) !important;
         }
 
         .select2-container--default.select2-container--focus .select2-selection--multiple,
@@ -1130,6 +1132,35 @@
                 width: 100% !important;
             }
         }
+
+
+        /*select[multiple]:has(option[selected]) {*/
+        /*    background: purple !important;*/
+        /*    color: white !important;*/
+        /*}*/
+
+
+        select[multiple] {
+            option[selected],
+            option:focus,
+            option:active,
+            option:checked {
+                background-color: hsl(from var(--main-theme-color) h s calc(l - 5)) !important;
+                color: var(--nav-primary-text-color) !important;
+            }
+        }
+
+        /**
+        Since Safari doesn't allow tweaking option background colors - sometimes -
+        this at least sets the background of the
+        select to a higher contrast color
+         */
+        @media screen and (-webkit-min-device-pixel-ratio: 0) {
+            select[multiple] {
+                background-color: light-dark(white, var(--input-border-color)) !important;
+            }
+        }
+
 
 
     </style>
