@@ -208,6 +208,26 @@ class AcceptanceController extends Controller
             'qty' => $acceptance->qty ?? 1,
         ];
 
+        // Add custom fields for asset (show_in_email = 1, field_encrypted = 0)
+        $customFields = [];
+        if ($item instanceof \App\Models\Asset && $item->model && $item->model->fieldset) {
+            $fields = $item->model->fieldset->fields->where('show_in_email', true)->where('field_encrypted', false);
+            foreach ($fields as $field) {
+                $label = $field->name;
+                $dbColumn = $field->db_column;
+                $value = $item->$dbColumn;
+                if (!is_null($value) && $value !== '') {
+                    $customFields[] = [
+                        'label' => $label,
+                        'value' => $value,
+                    ];
+                }
+            }
+        }
+        if (!empty($customFields)) {
+            $data['custom_fields'] = $customFields;
+        }
+
         if ($request->input('asset_acceptance') === 'accepted') {
 
             $pdf_filename = 'accepted-'.$acceptance->checkoutable_id.'-'.$acceptance->display_checkoutable_type.'-eula-'.date('Y-m-d-h-i-s').'.pdf';
