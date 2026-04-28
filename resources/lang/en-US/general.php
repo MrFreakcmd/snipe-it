@@ -750,6 +750,8 @@ return [
     'months_plural' => '1 month|:count months',
 
     'token_unrevoked' => 'API token reinstated',
-    'token_revoked' => 'API token revoked',
 
+    // Add these to the array if not present
+    'assigned_by' => 'Assigned by',
+    'signed_in_place' => 'Signed in place',
 ];
