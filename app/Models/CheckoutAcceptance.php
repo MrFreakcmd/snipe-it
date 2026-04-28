@@ -208,7 +208,7 @@ class CheckoutAcceptance extends Model
         $pdf->SetAuthor($data['assigned_to']);
         $pdf->SetTitle('Asset Acceptance: '.$data['item_tag']);
         $pdf->SetSubject('Asset Acceptance: '.$data['item_tag']);
-        $pdf->SetKeywords('Snipe-IT, assets, acceptance, eula, tos,' . $data['item_tag'] ?? null . ', ' . $data['item_name'] ?? null . ', ' . $data['assigned_to'] ?? null);
+        $pdf->SetKeywords('Snipe-IT, assets, acceptance, eula, tos,'.$data['item_tag'] ?? null.', '.$data['item_name'] ?? null.', '.$data['assigned_to'] ?? null);
         $pdf->SetFont('dejavusans', '', 8, '', true);
         $pdf->SetPrintHeader(false);
         $pdf->SetPrintFooter(false);
@@ -262,16 +262,16 @@ class CheckoutAcceptance extends Model
             $pdf->writeHTML(trans('general.email').': '.e($data['email']), true, 0, true, 0, '');
         }
         // Add assigning user if present
-        if (!empty($data['assigning_user'])) {
+        if (! empty($data['assigning_user'])) {
             $assigningUser = $data['assigning_user'];
             $assigningUserLine = trans('general.assigned_by').': '.e($assigningUser['name'] ?? $assigningUser['email'] ?? '');
-            if (!empty($assigningUser['employee_num'])) {
+            if (! empty($assigningUser['employee_num'])) {
                 $assigningUserLine .= ' ('.e($assigningUser['employee_num']).')';
             }
             $pdf->writeHTML($assigningUserLine, true, 0, true, 0, '');
         }
         // Add signed in place if present
-        if (!empty($data['signed_in_place'])) {
+        if (! empty($data['signed_in_place'])) {
             $pdf->writeHTML(trans('general.signed_in_place').': '.(filter_var($data['signed_in_place'], FILTER_VALIDATE_BOOLEAN) ? trans('general.yes') : trans('general.no')), true, 0, true, 0, '');
         }
 
