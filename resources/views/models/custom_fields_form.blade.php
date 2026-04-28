@@ -1,12 +1,16 @@
 @if (($model) && ($model->fieldset) && $model->fieldset->displayAnyFieldsInForm($show_custom_fields_type ?? ''))
-    <div class="col-md-12 col-sm-12">
 
+
+    @if(isset($show_fieldset) && ($show_fieldset=='true'))
     <fieldset name="custom-fields">
         <x-form.legend
                 help_text="{!! trans('admin/custom_fields/general.general_help_text') !!}">
 
             {{ trans('admin/custom_fields/general.custom_fields') }}
         </x-form.legend>
+
+        @endif
+
 
   @foreach($model->fieldset->fields as $field)
     @if (!isset($show_custom_fields_type) || ($field->displayFieldInCurrentForm($show_custom_fields_type)))
@@ -15,12 +19,12 @@
     <div class="form-group{{ $errors->has($field->db_column_name()) ? ' has-error' : '' }}">
 
 
-      <label for="{{ $field->db_column_name() }}" class="col-md-3 control-label">
-          {{ $field->name }}
+        <label for="{{ $field->db_column_name() }}" class="col-md-3 control-label">
+            {{ $field->name }}
+            <br>
+        </label>
 
-      </label>
-
-      <div class="col-md-7 col-sm-12">
+        <div class="col-md-8 col-sm-12">
 
           @if ($field->element!='text')
 
@@ -36,7 +40,7 @@
 
               @elseif ($field->element=='textarea')
                   <!-- Textarea -->
-                  <textarea class="col-md-6 form-control" id="{{ $field->db_column_name() }}" name="{{ $field->db_column_name() }}"{{ ($field->pivot->required=='1') ? ' required' : '' }}>{{ old($field->db_column_name(),(isset($item) ? Helper::gracefulDecrypt($field, $item->{$field->db_column_name()}) : $field->defaultValue($model->id))) }}</textarea>
+                    <textarea rows="6" class="form-control" id="{{ $field->db_column_name() }}" name="{{ $field->db_column_name() }}"{{ ($field->pivot->required=='1') ? ' required' : '' }}>{{ old($field->db_column_name(),(isset($item) ? Helper::gracefulDecrypt($field, $item->{$field->db_column_name()}) : $field->defaultValue($model->id))) }}</textarea>
 
               @elseif ($field->element=='checkbox')
                   <!-- Checkbox -->
@@ -66,9 +70,10 @@
             <!-- Date field -->
                 @if ($field->format=='DATE')
 
-                        <div class="input-group col-md-5" style="padding-left: 0px;">
-                            <div class="input-group date" data-provide="datepicker" data-date-format="yyyy-mm-dd" data-autoclose="true" data-date-clear-btn="true">
-                                <input type="text" class="form-control" placeholder="{{ trans('general.select_date') }}" name="{{ $field->db_column_name() }}" id="{{ $field->db_column_name() }}" readonly value="{{ old($field->db_column_name(),(isset($item) ? Helper::gracefulDecrypt($field, $item->{$field->db_column_name()}) : $field->defaultValue($model->id))) }}"  style="background-color:inherit"{{ ($field->pivot->required=='1') ? ' required' : '' }}>
+                    <div class="input-group col-md-7">
+
+                        <div class="input-group date" data-provide="datepicker" data-date-format="yyyy-mm-dd" data-autoclose="true" data-date-clear-btn="true">
+                            <input type="text" class="form-control" placeholder="{{ trans('general.select_date') }}" name="{{ $field->db_column_name() }}" id="{{ $field->db_column_name() }}" value="{{ old($field->db_column_name(),(isset($item) ? Helper::gracefulDecrypt($field, $item->{$field->db_column_name()}) : $field->defaultValue($model->id))) }}" style="background-color:inherit"{{ ($field->pivot->required=='1') ? ' required' : '' }}>
                                 <span class="input-group-addon"><x-icon type="calendar" /></span>
                             </div>
                         </div>
@@ -84,7 +89,16 @@
 
           @endif
 
-              @if ($field->help_text!='')
+            {{-- Visibility icons below the field, before help text --}}
+            @php $presenter = new \App\Presenters\CustomFieldPresenter($field); @endphp
+            @if (count($presenter->visibilityIconsArray()))
+                @if ($field->help_text != '')
+                    <p class="help-block">{{ $field->help_text }} <span class="custom-field-visibility-icons"><br>{!! $presenter->visibilityIcons() !!}</span>
+                    </p>
+                @else
+                    <div class="custom-field-visibility-icons" style="margin-bottom:7px;">{!! $presenter->visibilityIcons() !!}</div>
+                @endif
+            @elseif ($field->help_text != '')
               <p class="help-block">{{ $field->help_text }}</p>
               @endif
 
@@ -107,8 +121,6 @@
             @endif
   @endforeach
     </fieldset>
-    </div>
-@endif
 
-
+    @endif
 
