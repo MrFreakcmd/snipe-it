@@ -244,12 +244,12 @@ class CheckoutAcceptance extends Model
             $pdf->writeHTML(trans('admin/hardware/form.serial').': '.e($data['item_serial']), true, 0, true, 0, '');
         }
         // Render custom fields if present
-        if (!empty($data['custom_fields']) && is_array($data['custom_fields'])) {
+        if (! empty($data['custom_fields']) && is_array($data['custom_fields'])) {
             foreach ($data['custom_fields'] as $customField) {
                 $label = $customField['label'] ?? '';
                 $value = $customField['value'] ?? '';
                 if ($label !== '' && $value !== '') {
-                    $pdf->writeHTML(e($label) . ': ' . e($value), true, 0, true, 0, '');
+                    $pdf->writeHTML(e($label).': '.e($value), true, 0, true, 0, '');
                 }
             }
         }
@@ -264,7 +264,6 @@ class CheckoutAcceptance extends Model
 
         $pdf->Ln();
         $pdf->writeHTML('<hr>', true, 0, true, 0, '');
-
 
         // Break the EULA into lines based on newlines, and check each line for RTL or CJK characters
         $eula_lines = preg_split("/\r\n|\n|\r/", $data['eula']);
