@@ -466,9 +466,14 @@ class CheckoutableListener
          * 1. The asset requires acceptance
          * 2. The item has a EULA
          * 3. The item should send an email at check-in/check-out
+         * 4. The config('app.always_send_email') is true
          */
         if (Context::get('action') === 'bulk_asset_checkout') {
             return false;
+        }
+
+        if (config('app.always_send_email')) {
+            return true;
         }
 
         if ($checkoutable->requireAcceptance()) {
