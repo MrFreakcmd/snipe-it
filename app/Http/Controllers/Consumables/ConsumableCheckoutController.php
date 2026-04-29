@@ -25,33 +25,27 @@ class ConsumableCheckoutController extends Controller
      *
      * @param  int  $id
      */
-    public function create($id): View|RedirectResponse
+    public function create(Consumable $consumable): View|RedirectResponse
     {
 
-        if ($consumable = Consumable::find($id)) {
+        $this->authorize('checkout', $consumable);
 
-            $this->authorize('checkout', $consumable);
+        // Make sure the category is valid
+        if ($consumable->category) {
 
-            // Make sure the category is valid
-            if ($consumable->category) {
-
-                // Make sure there is at least one available to checkout
-                if ($consumable->numRemaining() <= 0) {
-                    return redirect()->route('consumables.index')
-                        ->with('error', trans('admin/consumables/message.checkout.unavailable', ['requested' => 1, 'remaining' => $consumable->numRemaining()]));
-                }
-
-                // Return the checkout view
-                return view('consumables/checkout', compact('consumable'));
+            // Make sure there is at least one available to checkout
+            if ($consumable->numRemaining() <= 0) {
+                return redirect()->route('consumables.index')
+                    ->with('error', trans('admin/consumables/message.checkout.unavailable', ['requested' => 1, 'remaining' => $consumable->numRemaining()]));
             }
 
-            // Invalid category
-            return redirect()->route('consumables.edit', ['consumable' => $consumable->id])
-                ->with('error', trans('general.invalid_item_category_single', ['type' => trans('general.consumable')]));
+            // Return the checkout view
+            return view('consumables/checkout', compact('consumable'));
         }
 
-        // Not found
-        return redirect()->route('consumables.index')->with('error', trans('admin/consumables/message.does_not_exist'));
+        // Invalid category
+        return redirect()->route('consumables.edit', ['consumable' => $consumable->id])
+            ->with('error', trans('general.invalid_item_category_single', ['type' => trans('general.consumable')]));
 
     }
 
@@ -68,12 +62,8 @@ class ConsumableCheckoutController extends Controller
      *
      * @throws AuthorizationException
      */
-    public function store(Request $request, $consumableId)
+    public function store(Request $request, Consumable $consumable)
     {
-        if (is_null($consumable = Consumable::with('users')->find($consumableId))) {
-            return redirect()->route('consumables.index')->with('error', trans('admin/consumables/message.not_found'));
-        }
-
         $this->authorize('checkout', $consumable);
 
         // If the quantity is not present in the request or is not a positive integer, set it to 1
