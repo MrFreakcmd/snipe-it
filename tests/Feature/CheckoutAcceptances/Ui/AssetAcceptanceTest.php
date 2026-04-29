@@ -320,4 +320,30 @@ class AssetAcceptanceTest extends TestCase
             ->assertDontSee(route('users.show', $assignee), false)
             ->assertDontSee(route('hardware.checkout.create', $asset), false);
     }
+
+    public function test_acceptance_create_page_shows_email_info_when_always_send_email_enabled()
+    {
+        $checkoutAcceptance = CheckoutAcceptance::factory()->pending()->create();
+        config(['app.always_send_email' => true]);
+
+        $response = $this->actingAs($checkoutAcceptance->assignedTo)
+            ->get(route('account.accept.item', $checkoutAcceptance));
+
+        $response->assertOk();
+        $response->assertSee(trans('general.acceptance_email_always_sent'), false);
+        $response->assertDontSee(trans('mail.send_pdf_copy'), false);
+    }
+
+    public function test_acceptance_create_page_shows_checkbox_when_always_send_email_disabled()
+    {
+        $checkoutAcceptance = CheckoutAcceptance::factory()->pending()->create();
+        config(['app.always_send_email' => false]);
+
+        $response = $this->actingAs($checkoutAcceptance->assignedTo)
+            ->get(route('account.accept.item', $checkoutAcceptance));
+
+        $response->assertOk();
+        $response->assertSee(trans('mail.send_pdf_copy'), false);
+        $response->assertDontSee(trans('general.acceptance_email_always_sent'), false);
+    }
 }

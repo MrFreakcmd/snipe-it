@@ -546,4 +546,12 @@ return [
       */
     'always_send_email' => env('ALWAYS_SEND_EMAIL', false),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Always Send EULA
+    |--------------------------------------------------------------------------
+    | If true, the EULA will always be sent and the checkbox will be hidden.
+    */
+    'always_send_eula' => env('ALWAYS_SEND_EULA', false),
+
 ];

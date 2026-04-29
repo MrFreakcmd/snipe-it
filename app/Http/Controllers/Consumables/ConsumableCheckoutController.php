@@ -89,14 +89,14 @@ class ConsumableCheckoutController extends Controller
         // Update the consumable data
         $consumable->assigned_to = e($request->input('assigned_to'));
 
-        for ($i = 0; $i < $quantity; $i++) {
-            $consumable->users()->attach($consumable->id, [
-                'consumable_id' => $consumable->id,
-                'created_by' => $admin_user->id,
-                'assigned_to' => e($request->input('assigned_to')),
-                'note' => $request->input('note'),
-            ]);
-        }
+        // Attach the consumable to the user ONCE with the correct qty and note
+        $consumable->users()->attach($consumable->id, [
+            'consumable_id' => $consumable->id,
+            'created_by' => $admin_user->id,
+            'assigned_to' => $assigned_to,
+            'note' => $request->input('note'),
+            'qty' => $quantity,
+        ]);
 
         $consumable->checkout_qty = $quantity;
 

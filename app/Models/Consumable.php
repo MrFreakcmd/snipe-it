@@ -525,14 +525,13 @@ class Consumable extends SnipeModel
 
         // Attach the consumable to the user if not already attached
         $pivot = $acceptedBy->consumables()->where('consumable_id', $this->id)->first();
-        if (!$pivot) {
+        if (! $pivot) {
             $acceptedBy->consumables()->attach($this->id, [
                 'created_by' => $acceptance?->created_by ?? null,
             ]);
         }
 
-        // Log the acceptance action
-        $this->logActionAcceptance('accepted', $acceptedBy, $acceptance?->qty ?? 1, $acceptance?->note);
+        // Logging handled by event listener; do not log here to avoid duplicates.
     }
 
     /**
@@ -556,8 +555,7 @@ class Consumable extends SnipeModel
         // Detach the consumable from the user (if present)
         $declinedBy->consumables()->detach($this->id);
 
-        // Log the decline action
-        $this->logActionAcceptance('declined', $declinedBy, $qty, $note);
+        // Logging handled by event listener; do not log here to avoid duplicates.
     }
 
     /**

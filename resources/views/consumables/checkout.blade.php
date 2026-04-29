@@ -10,7 +10,7 @@
 @section('content')
 
 <div class="row">
-  <div class="col-md-9">
+    <div class="col-md-6 col-md-offset-3">
 
     <form class="form-horizontal" id="checkout_form" method="post" action="" autocomplete="off">
       <!-- CSRF Token -->
@@ -81,71 +81,83 @@
           <!-- User -->
             @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.select_user'), 'fieldname' => 'assigned_to', 'required'=> 'true'])
 
-
-            @if ($consumable->requireAcceptance() || (string) $snipeSettings->require_accept_signature === '1' || $consumable->getEula() || ($snipeSettings->webhook_endpoint!=''))
-              <div class="form-group notification-callout">
-                <div class="col-md-8 col-md-offset-3">
-                  <div class="callout callout-info">
-
-                    @if ($consumable->category->require_acceptance=='1')
-                      <i class="far fa-envelope"></i>
-                      {{ trans('admin/categories/general.required_acceptance') }}
-                      <br>
-                    @endif
-
-                    @if ($consumable->getEula())
-                      <i class="far fa-envelope"></i>
-                      {{ trans('admin/categories/general.required_eula') }}
-                        <br>
-                    @endif
-
-                    @if (($consumable->category) && ($consumable->category->checkin_email))
-                      <i class="far fa-envelope"></i>
-                      {{ trans('admin/categories/general.checkin_email_notification') }}
-                      <br>
-                    @endif
-
-                    @if ($snipeSettings->webhook_endpoint!='')
-                        <i class="fab fa-slack"></i>
-                        {{ trans('general.webhook_msg_note') }}
-                    @endif
+              <!-- Checkout QTY -->
+              <div class="form-group {{ $errors->has('qty') ? 'error' : '' }} ">
+                  <label for="qty" class="col-md-3 control-label">{{ trans('general.qty') }}</label>
+                  <div class="col-md-7 col-sm-12 required">
+                      <div class="col-md-2" style="padding-left:0px">
+                          <input class="form-control" type="number" name="checkout_qty" id="checkout_qty" value="1" min="1" max="{{$consumable->numRemaining()}}" maxlength="999999"/>
+                      </div>
                   </div>
-                </div>
-
-                <!-- Sign in place checkbox -->
-                @if ($consumable->requireAcceptance() || (string) $snipeSettings->require_accept_signature === '1')
-                <div id="sign_in_place_div" class="col-md-7 col-md-offset-3">
-                  <label class="form-control">
-                    <input type="checkbox" value="1" name="sign_in_place" @checked(old('sign_in_place', session('sign_in_place', false))) aria-label="sign_in_place">
-                    {{ trans('general.sign_in_place') }}
-                  </label>
-                  <p class="help-block">
-                    {{ trans('general.sign_in_place_help') }}
-                  </p>
-                </div>
-                @endif
+                  {!! $errors->first('qty', '<div class="col-md-8 col-md-offset-3"><span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span></div>') !!}
               </div>
-            @endif
 
-          <!-- Checkout QTY -->
-          <div class="form-group {{ $errors->has('qty') ? 'error' : '' }} ">
-              <label for="qty" class="col-md-3 control-label">{{ trans('general.qty') }}</label>
-              <div class="col-md-7 col-sm-12 required">
-                  <div class="col-md-2" style="padding-left:0px">
-                    <input class="form-control" type="number" name="checkout_qty" id="checkout_qty" value="1" min="1" max="{{$consumable->numRemaining()}}" maxlength="999999"  />
+              <!-- Note -->
+              <div class="form-group {{ $errors->has('note') ? 'error' : '' }}">
+                  <label for="note" class="col-md-3 control-label">{{ trans('admin/hardware/form.notes') }}</label>
+                  <div class="col-md-7">
+                      <textarea class="col-md-6 form-control" name="note">{{ old('note') }}</textarea>
+                      {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                   </div>
               </div>
-              {!! $errors->first('qty', '<div class="col-md-8 col-md-offset-3"><span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span></div>') !!}
-          </div>
-          
-          <!-- Note -->
-          <div class="form-group {{ $errors->has('note') ? 'error' : '' }}">
-            <label for="note" class="col-md-3 control-label">{{ trans('admin/hardware/form.notes') }}</label>
-            <div class="col-md-7">
-              <textarea class="col-md-6 form-control" name="note">{{ old('note') }}</textarea>
-              {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
-            </div>
-          </div>
+
+
+              @if ($consumable->requireAcceptance() || (string) $snipeSettings->require_accept_signature === '1' || $consumable->getEula() || ($snipeSettings->webhook_endpoint!=''))
+                  <div class="form-group notification-callout">
+                      <div class="col-md-8 col-md-offset-3">
+                          <div class="callout callout-info">
+
+                              @if ($consumable->category->require_acceptance=='1')
+                                  <i class="far fa-envelope"></i>
+                                  {{ trans('admin/categories/general.required_acceptance') }}
+                                  <br>
+                              @endif
+
+                              @if ($consumable->getEula())
+                                  <i class="far fa-envelope"></i>
+                                  {{ trans('admin/categories/general.required_eula') }}
+                                  <br>
+                              @endif
+
+                              @if (($consumable->category) && ($consumable->category->checkin_email))
+                                  <i class="far fa-envelope"></i>
+                                  {{ trans('admin/categories/general.checkin_email_notification') }}
+                                  <br>
+                              @endif
+
+                              @if ($snipeSettings->webhook_endpoint!='')
+                                  <i class="fab fa-slack"></i>
+                                  {{ trans('general.webhook_msg_note') }}
+                              @endif
+                          </div>
+                      </div>
+
+                      <!-- EULA/email checkbox or info message -->
+                      @if ($consumable->getEula())
+                          <div class="col-md-8 col-md-offset-3">
+                              <label class="form-control">
+                                  <input type="checkbox" value="1" name="send_eula_copy" id="send_eula_copy" checked="checked" aria-label="send_eula_copy">
+                                  {{ trans('mail.send_pdf_copy') }}
+                              </label>
+                          </div>
+                      @endif
+
+                      <!-- Sign in place checkbox -->
+                      @if ($consumable->requireAcceptance() || (string) $snipeSettings->require_accept_signature === '1')
+                          <div id="sign_in_place_div" class="col-md-7 col-md-offset-3">
+                              <label class="form-control">
+                                  <input type="checkbox" value="1" name="sign_in_place" @checked(old('sign_in_place', session('sign_in_place', false))) aria-label="sign_in_place">
+                                  {{ trans('general.sign_in_place') }}
+                              </label>
+                              <p class="help-block">
+                                  {{ trans('general.sign_in_place_help') }}
+                              </p>
+                          </div>
+                      @endif
+                  </div>
+              @endif
+
+
         </div> <!-- .box-body -->
             <x-redirect_submit_options
                     index_route="consumables.index"

@@ -23,6 +23,21 @@ class CheckoutAcceptance extends Model
         'alert_on_response_id' => 'integer',
     ];
 
+    protected $fillable = [
+        'assigned_to_id',
+        'checkoutable_type',
+        'checkoutable_id',
+        'accepted_at',
+        'declined_at',
+        'note',
+        'signature_filename',
+        'stored_eula',
+        'stored_eula_file',
+        'qty',
+        'signed_in_place',
+        'signed_in_place_admin',
+    ];
+
     /**
      * Get the mail recipient from the config
      *

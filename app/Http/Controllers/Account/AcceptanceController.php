@@ -36,7 +36,8 @@ class AcceptanceController extends Controller
      */
     public function index(): View
     {
-        $acceptances = CheckoutAcceptance::forUser(auth()->user())->pending()->get();
+        $user = auth()->user();
+        $acceptances = CheckoutAcceptance::forUser($user)->pending()->get();
 
         return view('account/accept.index', compact('acceptances'));
     }
@@ -229,15 +230,21 @@ class AcceptanceController extends Controller
         }
 
         if ($request->input('asset_acceptance') === 'accepted') {
-
             $pdf_filename = 'accepted-'.$acceptance->checkoutable_id.'-'.$acceptance->display_checkoutable_type.'-eula-'.date('Y-m-d-h-i-s').'.pdf';
-
             // Generate the PDF content
             $pdf_content = $acceptance->generateAcceptancePdf($data, $acceptance);
             Storage::put('private_uploads/eula-pdfs/'.$pdf_filename, $pdf_content);
 
+            // Set sign_in_place fields if this is a sign-in-place admin flow
+            if ($isSignInPlaceAdminFlow) {
+                $acceptance->signed_in_place = true;
+                $acceptance->signed_in_place_admin = $currentUser->id;
+                $acceptance->save();
+            }
+
             // Log the acceptance
-            $acceptance->accept($sig_filename, $item->getEula(), $pdf_filename, $request->input('note'));
+            $accept_qty = $request->input('accept_qty', $acceptance->qty ?? 1);
+            $acceptance->accept($sig_filename, $item->getEula(), $pdf_filename, $request->input('note'), $accept_qty);
 
             // Send the PDF to the signing user
             if (($request->input('send_copy') === '1') && ($assignedUser->email !== '')) {

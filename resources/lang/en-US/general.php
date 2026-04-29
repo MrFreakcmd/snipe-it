@@ -590,6 +590,7 @@ return [
         'address2' => 'Address Line 2',
         'import_note' => 'Imported using csv importer',
     ],
+    'acceptance_email_always_sent' => 'An email will be sent to the accepting user automatically.',
     'remove_customfield_association' => 'Remove this field from the fieldset. This will not delete the custom field, only this field\'s association with this fieldset.',
     'checked_out_to_fields' => 'Checked Out To Fields',
     'percent_complete' => '% complete',
