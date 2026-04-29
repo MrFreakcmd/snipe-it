@@ -495,4 +495,85 @@ class Consumable extends SnipeModel
     {
         return $query->leftJoin('users as users_sort', 'consumables.created_by', '=', 'users_sort.id')->select('consumables.*')->orderBy('users_sort.first_name', $order)->orderBy('users_sort.last_name', $order);
     }
+
+    /**
+     * Handle logic after a consumable checkout is accepted by the user.
+     *
+     * @param  string|null  $signature
+     * @param  string|null  $filename
+     */
+    public function acceptedCheckout(User $acceptedBy, ?int $qty = null, ?string $note = null, $signature = null, $filename = null): void
+    {
+        // Find the pending acceptance for this user and consumable
+        $acceptance = $acceptedBy->getAssignedItemsWithPendingAcceptance()
+            ->where('item_id', $this->id)
+            ->where('qty', $qty)
+            ->where('item_type', self::class)
+            ->whereNull('declined_at')
+            ->sortByDesc('created_at')
+            ->first();
+
+        if ($acceptance) {
+            if ($qty !== null) {
+                $acceptance->qty = $qty;
+            }
+            if ($note !== null) {
+                $acceptance->note = $note;
+            }
+            $acceptance->save();
+        }
+
+        // Attach the consumable to the user if not already attached
+        $pivot = $acceptedBy->consumables()->where('consumable_id', $this->id)->first();
+        if (!$pivot) {
+            $acceptedBy->consumables()->attach($this->id, [
+                'created_by' => $acceptance?->created_by ?? null,
+            ]);
+        }
+
+        // Log the acceptance action
+        $this->logActionAcceptance('accepted', $acceptedBy, $acceptance?->qty ?? 1, $acceptance?->note);
+    }
+
+    /**
+     * Handle logic after a consumable checkout is declined by the user.
+     *
+     * @param  string|null  $signature
+     */
+    public function declinedCheckout(User $declinedBy, $signature = null): void
+    {
+        // Find the pending acceptance for this user and consumable
+        $acceptance = $declinedBy->acceptances()
+            ->where('item_id', $this->id)
+            ->where('item_type', self::class)
+            ->whereNull('accepted_at')
+            ->latest('created_at')
+            ->first();
+
+        $qty = $acceptance?->qty ?? 1;
+        $note = $acceptance?->note;
+
+        // Detach the consumable from the user (if present)
+        $declinedBy->consumables()->detach($this->id);
+
+        // Log the decline action
+        $this->logActionAcceptance('declined', $declinedBy, $qty, $note);
+    }
+
+    /**
+     * Log an acceptance or decline action for this consumable.
+     */
+    protected function logActionAcceptance(string $actionType, User $user, int $qty, ?string $note = null): void
+    {
+        $this->assetlog()->create([
+            'action_type' => $actionType,
+            'target_id' => $user->id,
+            'target_type' => User::class,
+            'item_id' => $this->id,
+            'item_type' => self::class,
+            'quantity' => $qty,
+            'note' => $note,
+            'created_by' => auth()->id() ?? $user->id,
+        ]);
+    }
 }
