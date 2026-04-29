@@ -54,6 +54,7 @@ return [
     'avatar_upload' => 'Upload Avatar',
     'back' => 'Back',
     'bad_data' => 'Nothing found. Maybe bad data?',
+    'bad_data_or_already_accepted' => 'No corresponding acceptance was found. You might not have permission to perform this action, or it may have already been accepted',
     'bulkaudit' => 'Scanner Bulk Audit',
     'bulkaudit_status' => 'Audit Status',
     'bulk_checkout' => 'Bulk Checkout',

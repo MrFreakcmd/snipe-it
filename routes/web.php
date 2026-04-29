@@ -545,19 +545,19 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
         ->name('reports.activity.post');
 
     Route::get('unaccepted_assets/{deleted?}', [ReportsController::class, 'getAssetAcceptanceReport'])
-        ->name('reports/unaccepted_assets')
+        ->name('reports/unaccepted_items')
         ->breadcrumbs(fn (Trail $trail) => $trail->parent('home')
-            ->push(trans('general.unaccepted_asset_report'), route('reports/unaccepted_assets')));
+            ->push(trans('general.unaccepted_asset_report'), route('reports/unaccepted_items')));
 
     Route::post('unaccepted_assets/sent_reminder', [ReportsController::class, 'sentAssetAcceptanceReminder'])
-        ->name('reports/unaccepted_assets_sent_reminder');
+        ->name('reports/unaccepted_items_sent_reminder');
 
     Route::delete('unaccepted_assets/{acceptanceId}/delete', [ReportsController::class, 'deleteAssetAcceptance'])
-        ->name('reports/unaccepted_assets_delete');
+        ->name('reports/unaccepted_items_delete');
 
     Route::post(
         'unaccepted_assets/{deleted?}', [ReportsController::class, 'postAssetAcceptanceReport'])
-        ->name('reports/export/unaccepted_assets');
+        ->name('reports/export/unaccepted_items');
 
 });
 

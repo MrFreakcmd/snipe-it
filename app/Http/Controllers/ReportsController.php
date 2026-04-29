@@ -1218,7 +1218,7 @@ class ReportsController extends Controller
             ->filter(fn ($unaccepted) => $unaccepted->checkoutable)
             ->map(fn ($unaccepted) => Checkoutable::fromAcceptance($unaccepted));
 
-        return view('reports/unaccepted_assets', compact('itemsForReport', 'showDeleted'));
+        return view('reports/unaccepted_items', compact('itemsForReport', 'showDeleted'));
     }
 
     /**
@@ -1251,7 +1251,7 @@ class ReportsController extends Controller
             Log::debug('No pending acceptances');
 
             // Redirect to the unaccepted items report page with error
-            return redirect()->route('reports/unaccepted_assets')->with('error', trans('general.bad_data'));
+            return redirect()->route('reports/unaccepted_items')->with('error', trans('general.bad_data_or_already_accepted'));
         }
         $item = $acceptance->checkoutable;
         $assignee = $acceptance->assignedTo ?? $item->assignedTo ?? null;
@@ -1263,7 +1263,7 @@ class ReportsController extends Controller
         if (is_null($acceptance->created_at)) {
             Log::debug('No acceptance created_at');
 
-            return redirect()->route('reports/unaccepted_assets')->with('error', trans('general.bad_data'));
+            return redirect()->route('reports/unaccepted_items')->with('error', trans('general.bad_data_or_already_accepted'));
         } else {
             if ($item instanceof LicenseSeat) {
                 $logItem_res = $item->license->checkouts()->with('adminuser')->where('created_at', '=', $acceptance->created_at)->get();
@@ -1273,18 +1273,18 @@ class ReportsController extends Controller
             if ($logItem_res->isEmpty()) {
                 Log::debug('Acceptance date mismatch');
 
-                return redirect()->route('reports/unaccepted_assets')->with('error', trans('general.bad_data'));
+                return redirect()->route('reports/unaccepted_items')->with('error', trans('general.bad_data_or_already_accepted'));
             }
             $logItem = $logItem_res[0];
         }
 
         if (is_null($email) || $email === '') {
-            return redirect()->route('reports/unaccepted_assets')->with('error', trans('general.no_email'));
+            return redirect()->route('reports/unaccepted_items')->with('error', trans('general.no_email'));
         }
         $mailable = $this->getCheckoutMailType($acceptance, $logItem);
         Mail::to($email)->send($mailable->locale($locale));
 
-        return redirect()->route('reports/unaccepted_assets')->with('success', trans('admin/reports/general.reminder_sent'));
+        return redirect()->route('reports/unaccepted_items')->with('success', trans('admin/reports/general.reminder_sent'));
     }
 
     private function getCheckoutMailType(CheckoutAcceptance $acceptance, $logItem): Mailable
@@ -1321,13 +1321,13 @@ class ReportsController extends Controller
 
         if (! $acceptance = CheckoutAcceptance::pending()->find($acceptanceId)) {
             // Redirect to the unaccepted assets report page with error
-            return redirect()->route('reports/unaccepted_assets')->with('error', trans('general.bad_data'));
+            return redirect()->route('reports/unaccepted_items')->with('error', trans('general.bad_data_or_already_accepted'));
         }
 
         if ($acceptance->delete()) {
-            return redirect()->route('reports/unaccepted_assets')->with('success', trans('admin/reports/general.acceptance_deleted'));
+            return redirect()->route('reports/unaccepted_items')->with('success', trans('admin/reports/general.acceptance_deleted'));
         } else {
-            return redirect()->route('reports/unaccepted_assets')->with('error', trans('general.deletion_failed'));
+            return redirect()->route('reports/unaccepted_items')->with('error', trans('general.deletion_failed'));
         }
     }
 
