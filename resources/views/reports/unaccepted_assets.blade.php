@@ -46,7 +46,7 @@
                 data-fixed-right-number="false"
                 class="table table-striped snipe-table"
                 data-export-options='{
-                    "fileName": "maintenance-report-{{ date('Y-m-d') }}",
+                    "fileName": "unaccepted-items-report-{{ date('Y-m-d') }}",
                     "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
                     }'>
             <thead>

@@ -6,6 +6,7 @@ use App\Events\CheckoutAccepted;
 use App\Events\CheckoutDeclined;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AcceptSignatureRequest;
 use App\Mail\CheckoutAcceptanceResponseMail;
 use App\Models\Accessory;
 use App\Models\Actionlog;
@@ -58,7 +59,7 @@ class AcceptanceController extends Controller
         $acceptance = CheckoutAcceptance::find($id);
 
         if (! $acceptance) {
-            return redirect()->route('account.accept')->with('error', trans('admin/hardware/message.does_not_exist'));
+            return redirect()->route('account.accept')->with('error', trans('general.generic_model_not_found', ['model' => trans('general.accept_eula')]));
         }
 
         if (! $acceptance->isPending()) {
@@ -91,7 +92,7 @@ class AcceptanceController extends Controller
      *
      * @param  int  $id
      */
-    public function store(Request $request, $id): RedirectResponse
+    public function store(AcceptSignatureRequest $request, $id): RedirectResponse
     {
         $currentUser = auth()->user();
 
