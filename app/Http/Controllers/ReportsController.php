@@ -1230,6 +1230,10 @@ class ReportsController extends Controller
      */
     public function sentAssetAcceptanceReminder(Request $request): RedirectResponse
     {
+        $user = auth()->user();
+        if (! ($user?->isAdmin() || $user?->isSuperUser())) {
+            abort(403);
+        }
         $this->authorize('reports.view');
         $id = $request->input('acceptance_id');
         $query = CheckoutAcceptance::query()
@@ -1317,6 +1321,10 @@ class ReportsController extends Controller
      */
     public function deleteAssetAcceptance($acceptanceId = null): RedirectResponse
     {
+        $user = auth()->user();
+        if (! ($user?->isAdmin() || $user?->isSuperUser())) {
+            abort(403);
+        }
         $this->authorize('reports.view');
 
         if (! $acceptance = CheckoutAcceptance::pending()->find($acceptanceId)) {
