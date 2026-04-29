@@ -537,4 +537,13 @@ return [
 
     'max_unpaginated_records' => env('MAX_UNPAGINATED', '5000'),
 
+    /*
+      |--------------------------------------------------------------------------
+      | Always send emails on acceptance/EULA
+      |--------------------------------------------------------------------------
+      | This setting allows you to bypass the "email me a copy" checkbox on EULA/item acceptance,
+      | and forces Snipe-IT to always send email to the accepting user if they have an email address.
+      */
+    'always_send_email' => env('ALWAYS_SEND_EMAIL', false),
+
 ];
