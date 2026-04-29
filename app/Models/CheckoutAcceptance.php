@@ -121,20 +121,27 @@ class CheckoutAcceptance extends Model
      * checkout_acceptances table or you'll get an error.
      *
      * @param  string  $signature_filename
+     * @param  string|null  $eula
+     * @param  string|null  $filename
+     * @param  string|null  $note
+     * @param  int|null  $qty
      */
-    public function accept($signature_filename, $eula = null, $filename = null, $note = null)
+    public function accept($signature_filename, $eula = null, $filename = null, $note = null, $qty = null)
     {
         $this->accepted_at = now();
         $this->signature_filename = $signature_filename;
         $this->stored_eula = $eula;
         $this->stored_eula_file = $filename;
         $this->note = $note;
+        if ($qty !== null) {
+            $this->qty = $qty;
+        }
         $this->save();
 
         /**
          * Update state for the checked out item
          */
-        $this->checkoutable->acceptedCheckout($this->assignedTo, $signature_filename, $filename);
+        $this->checkoutable->acceptedCheckout($this->assignedTo, $qty, $note, $signature_filename, $filename);
     }
 
     /**
