@@ -97,7 +97,7 @@
                                         <td @if(!$item->assignee || (method_exists($item->assignee, 'trashed') && $item->assignee->trashed())) style="text-decoration: line-through" @endif>
                                             {!! $item->assignee
                                                 ? optional($item->assignee->present())->nameUrl() ?? e($item->assignee->name)
-                                                : trans('admin/reports/general.deleted_user') !!}
+                                                : trans('general.deleted') !!}
                                         </td>
 
                                         {{-- Actions: send reminder / delete --}}

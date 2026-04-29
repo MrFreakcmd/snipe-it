@@ -1857,8 +1857,8 @@
                                             {{ trans('general.asset_maintenance_report') }}
                                         </a>
                                     </li>
-                                    <li {{!! (request()->is('reports/unaccepted_assets') ? ' class="active"' : '') !!}}>
-                                        <a href="{{ url('reports/unaccepted_assets') }}">
+                                    <li {{!! (request()->is('reports/unaccepted_items') ? ' class="active"' : '') !!}}>
+                                        <a href="{{ url('reports/unaccepted_items') }}">
                                             {{ trans('general.unaccepted_asset_report') }}
                                         </a>
                                     </li>

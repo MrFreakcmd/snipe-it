@@ -43,7 +43,7 @@ class AcceptanceReminderTest extends TestCase
         $userWithoutPermission = User::factory()->create();
 
         $this->actingAs($userWithoutPermission)
-            ->post(route('reports/unaccepted_assets_sent_reminder', [
+            ->post(route('reports/unaccepted_items_sent_reminder', [
                 'acceptance_id' => $checkoutAcceptance->id,
             ]))
             ->assertForbidden();
@@ -54,7 +54,7 @@ class AcceptanceReminderTest extends TestCase
     public function test_reminder_not_sent_if_acceptance_does_not_exist()
     {
         $this->actingAs($this->admin)
-            ->post(route('reports/unaccepted_assets_sent_reminder', [
+            ->post(route('reports/unaccepted_items_sent_reminder', [
                 'acceptance_id' => 999999,
             ]));
 
@@ -66,7 +66,7 @@ class AcceptanceReminderTest extends TestCase
         $checkoutAcceptanceAlreadyAccepted = CheckoutAcceptance::factory()->accepted()->create();
 
         $this->actingAs($this->admin)
-            ->post(route('reports/unaccepted_assets_sent_reminder', [
+            ->post(route('reports/unaccepted_items_sent_reminder', [
                 'acceptance_id' => $checkoutAcceptanceAlreadyAccepted->id,
             ]));
 
@@ -100,7 +100,7 @@ class AcceptanceReminderTest extends TestCase
         $checkoutAcceptance = $callback();
 
         $this->actingAs($this->admin)
-            ->post(route('reports/unaccepted_assets_sent_reminder', [
+            ->post(route('reports/unaccepted_items_sent_reminder', [
                 'acceptance_id' => $checkoutAcceptance->id,
             ]))
             // check we didn't crash...
@@ -124,10 +124,10 @@ class AcceptanceReminderTest extends TestCase
             ->create();
 
         $this->actingAs($this->admin)
-            ->post(route('reports/unaccepted_assets_sent_reminder', [
+            ->post(route('reports/unaccepted_items_sent_reminder', [
                 'acceptance_id' => $acceptance->id,
             ]))
-            ->assertRedirect(route('reports/unaccepted_assets'));
+            ->assertRedirect(route('reports/unaccepted_items'));
 
         Mail::assertSent(CheckoutAccessoryMail::class, 1);
 
@@ -153,10 +153,10 @@ class AcceptanceReminderTest extends TestCase
         $this->createActionLogEntry($asset, $this->admin, $this->assignee, $acceptance);
 
         $this->actingAs($this->admin)
-            ->post(route('reports/unaccepted_assets_sent_reminder', [
+            ->post(route('reports/unaccepted_items_sent_reminder', [
                 'acceptance_id' => $acceptance->id,
             ]))
-            ->assertRedirect(route('reports/unaccepted_assets'));
+            ->assertRedirect(route('reports/unaccepted_items'));
 
         Mail::assertSent(CheckoutAssetMail::class, 1);
 
@@ -182,10 +182,10 @@ class AcceptanceReminderTest extends TestCase
         $this->createActionLogEntry($consumable, $this->admin, $this->assignee, $acceptance);
 
         $this->actingAs($this->admin)
-            ->post(route('reports/unaccepted_assets_sent_reminder', [
+            ->post(route('reports/unaccepted_items_sent_reminder', [
                 'acceptance_id' => $acceptance->id,
             ]))
-            ->assertRedirect(route('reports/unaccepted_assets'));
+            ->assertRedirect(route('reports/unaccepted_items'));
 
         Mail::assertSent(CheckoutConsumableMail::class, 1);
 
@@ -211,10 +211,10 @@ class AcceptanceReminderTest extends TestCase
         $this->createActionLogEntry($licenseSeat, $this->admin, $this->assignee, $acceptance);
 
         $this->actingAs($this->admin)
-            ->post(route('reports/unaccepted_assets_sent_reminder', [
+            ->post(route('reports/unaccepted_items_sent_reminder', [
                 'acceptance_id' => $acceptance->id,
             ]))
-            ->assertRedirect(route('reports/unaccepted_assets'));
+            ->assertRedirect(route('reports/unaccepted_items'));
 
         Mail::assertSent(CheckoutLicenseMail::class, 1);
 
