@@ -206,7 +206,7 @@ class AcceptanceController extends Controller
 
         // If signed in place, add admin info for PDF
         if ($acceptance->signed_in_place && $acceptance->signed_in_place_admin) {
-            $admin = \App\Models\User::find($acceptance->signed_in_place_admin);
+            $admin = User::find($acceptance->signed_in_place_admin);
             if ($admin) {
                 $data['signed_in_place_admin'] = [
                     'name' => $admin->display_name,
