@@ -33,6 +33,7 @@ class AcceptanceItemAcceptedNotification extends Notification
         $this->file = $params['file'] ?? null;
         $this->qty = $params['qty'] ?? null;
         $this->note = $params['note'] ?? null;
+        $this->signed_in_place_admin = $params['signed_in_place_admin'] ?? null;
 
     }
 
@@ -76,6 +77,7 @@ class AcceptanceItemAcceptedNotification extends Notification
                 'assigned_to' => $this->assigned_to,
                 'company_name' => $this->company_name,
                 'qty' => $this->qty,
+                'signed_in_place_admin' => $this->signed_in_place_admin,
                 'intro_text' => trans('mail.acceptance_accepted_greeting', ['user' => $this->assigned_to, 'item' => $this->item_name]),
             ])
             ->subject('✅ '.trans('mail.acceptance_accepted', ['user' => $this->assigned_to, 'item' => $this->item_name]))

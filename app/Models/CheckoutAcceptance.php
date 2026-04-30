@@ -295,6 +295,18 @@ class CheckoutAcceptance extends Model
         // Add signed in place if present
         if (! empty($data['signed_in_place'])) {
             $pdf->writeHTML(trans('general.signed_in_place').': '.(filter_var($data['signed_in_place'], FILTER_VALIDATE_BOOLEAN) ? trans('general.yes') : trans('general.no')), true, 0, true, 0, '');
+            // If signed in place, show admin info
+            if (!empty($data['signed_in_place_admin'])) {
+                $admin = $data['signed_in_place_admin'];
+                $adminLine = trans('general.signed_in_place_admin').': ' . e($admin['name']);
+                if (!empty($admin['username'])) {
+                    $adminLine .= ' (' . e($admin['username']) . ')';
+                }
+                if (!empty($admin['email'])) {
+                    $adminLine .= ' <' . e($admin['email']) . '>';
+                }
+                $pdf->writeHTML($adminLine, true, 0, true, 0, '');
+            }
         }
 
         $pdf->Ln();

@@ -9,7 +9,7 @@
 @if (isset($item_name))
 | **{{ trans('general.item_name') }}** | {{ $item_name }} |
 @endif
-| **{{ trans('mail.user') }}** | {{ $assigned_to }} |
+| **{{ trans('mail.user') }} | {{ $assigned_to }} |
 @if (isset($user->location))
 | **{{ trans('general.location') }}** | {{ $user->location->name }} |
 @endif
@@ -42,6 +42,9 @@
 @endif
 @if (isset($qty))
 | **{{ trans('general.qty') }}** | {{ $qty }} |
+@endif
+@if(isset($signed_in_place_admin) && is_array($signed_in_place_admin))
+| **{{ trans('general.signed_in_place_admin', ['admin' => $signed_in_place_admin['name']]) }}** | {{ $signed_in_place_admin['name'] }}@if(!empty($signed_in_place_admin['username'])) ({{ $signed_in_place_admin['username'] }})@endif@if(!empty($signed_in_place_admin['email'])) &lt;{{ $signed_in_place_admin['email'] }}&gt;@endif |
 @endif
 @endcomponent
 

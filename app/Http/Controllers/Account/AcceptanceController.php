@@ -204,6 +204,18 @@ class AcceptanceController extends Controller
             'qty' => $acceptance->qty ?? 1,
         ];
 
+        // If signed in place, add admin info for PDF
+        if ($acceptance->signed_in_place && $acceptance->signed_in_place_admin) {
+            $admin = \App\Models\User::find($acceptance->signed_in_place_admin);
+            if ($admin) {
+                $data['signed_in_place_admin'] = [
+                    'name' => $admin->display_name,
+                    'username' => $admin->username,
+                    'email' => $admin->email,
+                ];
+            }
+        }
+
         // Add custom fields for asset (show_in_email = 1, field_encrypted = 0)
         $customFields = [];
         if ($item instanceof Asset && $item->model && $item->model->fieldset) {
