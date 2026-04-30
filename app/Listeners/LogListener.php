@@ -10,6 +10,7 @@ use App\Events\UserMerged;
 use App\Models\Actionlog;
 use App\Models\LicenseSeat;
 use App\Models\User;
+use Illuminate\Events\Dispatcher;
 use Illuminate\Support\Facades\Log;
 
 class LogListener
@@ -133,7 +134,7 @@ class LogListener
     /**
      * Register the listeners for the subscriber.
      *
-     * @param  \Illuminate\Events\Dispatcher  $events
+     * @param  Dispatcher  $events
      */
     public function subscribe($events)
     {
