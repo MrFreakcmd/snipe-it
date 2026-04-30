@@ -59,7 +59,10 @@ class LogListener
         $logaction->action_type = 'accepted';
         $logaction->action_date = $event->acceptance->accepted_at;
         $logaction->quantity = $event->acceptance->qty ?? 1;
-        $logaction->created_by = auth()->user()->id;
+        $logaction->created_by = auth()->user()?->getAuthIdentifier();
+        $logaction->remote_ip = request()->ip();
+        $logaction->user_agent = request()->header('User-Agent');
+        $logaction->action_source = 'gui';
 
         // TODO: log the actual license seat that was checked out
         if ($event->acceptance->checkoutable instanceof LicenseSeat) {
@@ -79,7 +82,10 @@ class LogListener
         $logaction->action_type = 'declined';
         $logaction->action_date = $event->acceptance->declined_at;
         $logaction->quantity = $event->acceptance->qty ?? 1;
-        $logaction->created_by = auth()->user()->id;
+        $logaction->created_by = auth()->user()?->getAuthIdentifier();
+        $logaction->remote_ip = request()->ip();
+        $logaction->user_agent = request()->header('User-Agent');
+        $logaction->action_source = 'gui';
 
         // TODO: log the actual license seat that was checked out
         if ($event->acceptance->checkoutable instanceof LicenseSeat) {
@@ -127,7 +133,7 @@ class LogListener
     /**
      * Register the listeners for the subscriber.
      *
-     * @param  Illuminate\Events\Dispatcher  $events
+     * @param  \Illuminate\Events\Dispatcher  $events
      */
     public function subscribe($events)
     {
