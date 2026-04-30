@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Reporting;
 
+use App\Models\CheckoutAcceptance;
 use App\Models\User;
 use Illuminate\Testing\TestResponse;
 use League\Csv\Reader;
@@ -46,7 +47,7 @@ class UnacceptedAssetReportTest extends TestCase
         $this->actingAs(User::factory()->create())
             ->get(route('reports/unaccepted_items'))
             ->assertForbidden();
-        
+
     }
 
     public function test_user_can_list_unaccepted_assets()
@@ -56,11 +57,10 @@ class UnacceptedAssetReportTest extends TestCase
             ->assertOk();
     }
 
-
     public function test_regular_user_cannot_perform_reminder_or_delete()
     {
         $user = User::factory()->canViewReports()->create();
-        $acceptance = \App\Models\CheckoutAcceptance::factory()->pending()->create();
+        $acceptance = CheckoutAcceptance::factory()->pending()->create();
         $this->actingAs($user)
             ->post(route('reports/unaccepted_items_sent_reminder'), ['acceptance_id' => $acceptance->id])
             ->assertForbidden();
@@ -72,7 +72,7 @@ class UnacceptedAssetReportTest extends TestCase
     public function test_admin_can_perform_reminder_and_delete()
     {
         $admin = User::factory()->admin()->canViewReports()->create();
-        $acceptance = \App\Models\CheckoutAcceptance::factory()->pending()->create();
+        $acceptance = CheckoutAcceptance::factory()->pending()->create();
         $this->actingAs($admin)
             ->post(route('reports/unaccepted_items_sent_reminder'), ['acceptance_id' => $acceptance->id])
             ->assertStatus(302); // Or whatever is appropriate (redirect, etc)
@@ -84,7 +84,7 @@ class UnacceptedAssetReportTest extends TestCase
     public function test_superuser_can_perform_reminder_and_delete()
     {
         $superuser = User::factory()->superuser()->canViewReports()->create();
-        $acceptance = \App\Models\CheckoutAcceptance::factory()->pending()->create();
+        $acceptance = CheckoutAcceptance::factory()->pending()->create();
         $this->actingAs($superuser)
             ->post(route('reports/unaccepted_items_sent_reminder'), ['acceptance_id' => $acceptance->id])
             ->assertStatus(302);

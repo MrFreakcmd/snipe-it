@@ -92,7 +92,6 @@ class AcceptanceController extends Controller
      *
      * @param  int  $id
      */
-
     public function store(AcceptSignatureRequest $request, CheckoutAcceptance $acceptance): RedirectResponse
     {
         $currentUser = auth()->user();
@@ -100,7 +99,6 @@ class AcceptanceController extends Controller
         if (! $currentUser instanceof User) {
             return redirect()->route('account.accept')->with('error', trans('general.insufficient_permissions'));
         }
-
 
         $assignedUser = User::find($acceptance->assigned_to_id);
         $settings = Setting::getSettings();

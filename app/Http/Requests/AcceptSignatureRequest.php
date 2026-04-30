@@ -6,6 +6,7 @@ use App\Models\CheckoutAcceptance;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class AcceptSignatureRequest extends FormRequest
 {
@@ -56,7 +57,7 @@ class AcceptSignatureRequest extends FormRequest
         // If user is logged in and acceptance exists, treat as business logic error
         if ($user && $acceptance) {
             $redirectResponse = redirect()->route('account.accept')->with('error', trans('admin/users/message.error.incorrect_user_accepted'));
-            throw new \Illuminate\Validation\ValidationException($this->getValidatorInstance(), $redirectResponse);
+            throw new ValidationException($this->getValidatorInstance(), $redirectResponse);
         }
         // Otherwise, use default 403
         parent::failedAuthorization();

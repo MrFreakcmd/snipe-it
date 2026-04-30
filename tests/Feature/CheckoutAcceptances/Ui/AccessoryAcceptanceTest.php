@@ -4,7 +4,6 @@ namespace Tests\Feature\CheckoutAcceptances\Ui;
 
 use App\Models\Accessory;
 use App\Models\AccessoryCheckout;
-use App\Models\Asset;
 use App\Models\CheckoutAcceptance;
 use App\Models\User;
 use App\Notifications\AcceptanceItemAcceptedNotification;
