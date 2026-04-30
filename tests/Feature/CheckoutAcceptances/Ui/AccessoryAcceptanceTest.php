@@ -150,11 +150,15 @@ class AccessoryAcceptanceTest extends TestCase
     {
         Notification::fake();
 
+        $assignee = User::factory()->create();
         $otherUser = User::factory()->create();
+
+        $accessory = Accessory::factory()->create();
 
         $acceptance = CheckoutAcceptance::factory()
             ->pending()
-            ->for(Asset::factory()->laptopMbp(), 'checkoutable')
+            ->for($assignee, 'assignedTo')
+            ->for($accessory, 'checkoutable')
             ->create();
 
         $this->actingAs($otherUser)

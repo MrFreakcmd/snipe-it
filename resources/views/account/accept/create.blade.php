@@ -125,13 +125,12 @@
                         <div class="row">
                             <div class="col-md-7">
                                 @if ($acceptance->assignedTo?->email)
-                                    @if (config('app.always_send_email')!='true')
-                                        <div class="col-md-12">
-                                            {{ trans('general.acceptance_email_always_sent') }}
-                                            ({{ $acceptance->assignedTo->email }})
+                                    @if (config('app.always_send_email'))
+                                        <div class="col-md-12" id="emailInfoBox">
+                                            {{ trans('general.acceptance_email_always_sent') }} ({{ $acceptance->assignedTo->email }})
                                         </div>
                                     @else
-                                        <div class="col-md-12" style="display: none;" id="showEmailBox">
+                                        <div class="col-md-12" id="showEmailBox">
                                             <label class="form-control">
                                                 <input type="checkbox" value="1" name="send_copy" id="send_copy" checked="checked" aria-label="send_copy">
                                                 {{ trans('mail.send_pdf_copy') }} ({{ $acceptance->assignedTo->email }})
@@ -202,16 +201,16 @@
         @endif
         
         $('[name="asset_acceptance"]').on('change', function() {
-
             if ($(this).is(':checked') && $(this).attr('id') === 'declined') {
                 $("#showEmailBox").hide();
+                $("#emailInfoBox").hide();
                 $("#showSubmit").show();
                 $("#submit-button").removeClass("btn-success").addClass("btn-danger").show();
                 $("#submitIcon").removeClass("fa-check").addClass("fa-times");
                 $("#buttonText").text('{{ trans_choice('general.i_decline_item', $acceptance->qty ?? 1) }}');
                 $("#note").prop('required', true);
-
             } else if ($(this).is(':checked') && $(this).attr('id') === 'accepted') {
+                $("#emailInfoBox").show();
                 $("#showEmailBox").show();
                 $("#showSubmit").show();
                 $("#submit-button").removeClass("btn-danger").addClass("btn-success").show();

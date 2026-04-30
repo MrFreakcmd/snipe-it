@@ -33,7 +33,7 @@ class AcceptanceReminderTest extends TestCase
 
         Mail::fake();
 
-        $this->admin = User::factory()->canViewReports()->create();
+        $this->admin = User::factory()->admin()->canViewReports()->create();
         $this->assignee = User::factory()->create();
     }
 

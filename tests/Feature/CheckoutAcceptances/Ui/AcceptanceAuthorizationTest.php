@@ -36,7 +36,8 @@ class AcceptanceAuthorizationTest extends TestCase
                 'asset_acceptance' => 'accepted',
                 'note' => 'no',
             ]);
-        $response->assertForbidden();
+        $response->assertRedirectToRoute('account.accept');
+        $response->assertSessionHas('error');
         $this->assertNull($acceptance->fresh()->accepted_at);
     }
 }

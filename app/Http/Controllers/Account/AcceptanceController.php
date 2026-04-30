@@ -53,7 +53,7 @@ class AcceptanceController extends Controller
         $currentUser = auth()->user();
 
         if (! $currentUser instanceof User) {
-            abort(403, trans('general.insufficient_permissions'));
+            return redirect()->route('account.accept')->with('error', trans('general.insufficient_permissions'));
         }
 
         $acceptance = CheckoutAcceptance::find($id);
@@ -78,7 +78,7 @@ class AcceptanceController extends Controller
         }
 
         if (! Company::isCurrentUserHasAccess($acceptance->checkoutable)) {
-            return redirect()->route('account.accept')->with('error', trans('general.error_user_company'));
+            return redirect()->route('account.accept')->with('error', trans('general.insufficient_permissions'));
         }
 
         $checkedOutAt = Helper::getFormattedDateObject($acceptance->created_at, 'datetime', false);
@@ -92,19 +92,15 @@ class AcceptanceController extends Controller
      *
      * @param  int  $id
      */
-    public function store(AcceptSignatureRequest $request, $id): RedirectResponse
+
+    public function store(AcceptSignatureRequest $request, CheckoutAcceptance $acceptance): RedirectResponse
     {
         $currentUser = auth()->user();
 
         if (! $currentUser instanceof User) {
-            abort(403, trans('general.insufficient_permissions'));
+            return redirect()->route('account.accept')->with('error', trans('general.insufficient_permissions'));
         }
 
-        $acceptance = CheckoutAcceptance::find($id);
-
-        if (! $acceptance) {
-            return redirect()->route('account.accept')->with('error', trans('admin/hardware/message.does_not_exist'));
-        }
 
         $assignedUser = User::find($acceptance->assigned_to_id);
         $settings = Setting::getSettings();

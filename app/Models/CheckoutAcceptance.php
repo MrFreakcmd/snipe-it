@@ -127,7 +127,7 @@ class CheckoutAcceptance extends Model
      */
     public function isCheckedOutTo(User $user)
     {
-        return $this->assignedTo?->is($user);
+        return $this->assigned_to_id === $user->id;
     }
 
     /**

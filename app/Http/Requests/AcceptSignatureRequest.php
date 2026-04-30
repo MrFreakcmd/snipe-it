@@ -48,4 +48,17 @@ class AcceptSignatureRequest extends FormRequest
             // ...existing validation rules...
         ];
     }
+
+    protected function failedAuthorization()
+    {
+        $user = Auth::user();
+        $acceptance = $this->route('acceptance');
+        // If user is logged in and acceptance exists, treat as business logic error
+        if ($user && $acceptance) {
+            $redirectResponse = redirect()->route('account.accept')->with('error', trans('admin/users/message.error.incorrect_user_accepted'));
+            throw new \Illuminate\Validation\ValidationException($this->getValidatorInstance(), $redirectResponse);
+        }
+        // Otherwise, use default 403
+        parent::failedAuthorization();
+    }
 }

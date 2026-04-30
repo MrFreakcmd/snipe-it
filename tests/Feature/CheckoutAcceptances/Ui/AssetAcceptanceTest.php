@@ -257,7 +257,8 @@ class AssetAcceptanceTest extends TestCase
             ->post(route('account.store-acceptance', $checkoutAcceptance), [
                 'asset_acceptance' => 'accepted',
             ])
-            ->assertRedirect(route('users.show', $assignee));
+            ->assertRedirectToRoute('account.accept')
+            ->assertSessionHas('error');
     }
 
     public function test_stale_sign_in_place_post_with_missing_assignee_does_not_throw_route_error()
