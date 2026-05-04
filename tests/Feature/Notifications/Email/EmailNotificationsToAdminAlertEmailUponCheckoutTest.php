@@ -66,6 +66,21 @@ class EmailNotificationsToAdminAlertEmailUponCheckoutTest extends TestCase
         });
     }
 
+    public function test_admin_alert_email_sent_when_category_sends_email_and_admin_cc_always_disabled()
+    {
+        $this->settings
+            ->enableAdminCC('cc@example.com')
+            ->disableAdminCCAlways();
+
+        $this->category->update(['checkin_email' => true]);
+
+        $this->fireCheckoutEvent();
+
+        Mail::assertSent(CheckoutAssetMail::class, function (CheckoutAssetMail $mail) {
+            return $mail->hasCc('cc@example.com') || $mail->hasTo('cc@example.com');
+        });
+    }
+
     public function test_admin_alert_email_still_sent_when_user_has_no_email_address()
     {
         $this->settings->enableAdminCC('cc@example.com');
@@ -107,6 +122,22 @@ class EmailNotificationsToAdminAlertEmailUponCheckoutTest extends TestCase
 
         Mail::assertNotSent(CheckoutAssetMail::class, function (CheckoutAssetMail $mail) {
             return $mail->hasTo('cc@example.com') || $mail->hasCc('cc@example.com');
+        });
+    }
+
+    public function test_alert_email_receives_checkout_notification_when_admin_cc_always_enabled_and_admin_cc_email_empty()
+    {
+        $this->settings
+            ->disableAdminCC()
+            ->enableAlertEmail('alerts@example.com')
+            ->enableAdminCCAlways();
+
+        $this->category->update(['checkin_email' => false]);
+
+        $this->fireCheckoutEvent();
+
+        Mail::assertSent(CheckoutAssetMail::class, function (CheckoutAssetMail $mail) {
+            return $mail->hasTo('alerts@example.com') || $mail->hasCc('alerts@example.com');
         });
     }
 

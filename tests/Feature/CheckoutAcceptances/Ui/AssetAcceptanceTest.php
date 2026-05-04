@@ -6,9 +6,13 @@ use App\Events\CheckoutAccepted;
 use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\CheckoutAcceptance;
+use App\Models\CustomField;
 use App\Models\Setting;
 use App\Models\User;
+use App\Notifications\AcceptanceItemAcceptedNotification;
+use App\Notifications\AcceptanceItemAcceptedToUserNotification;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class AssetAcceptanceTest extends TestCase
@@ -180,6 +184,84 @@ class AssetAcceptanceTest extends TestCase
         );
     }
 
+    public function test_admin_acceptance_email_contains_custom_fields_marked_show_in_email(): void
+    {
+        Notification::fake();
+        $this->settings->enableAlertEmail();
+
+        $customField = CustomField::factory()->create([
+            'name' => 'Cost Center',
+            'show_in_email' => '1',
+            'field_encrypted' => '0',
+        ])->fresh();
+
+        $asset = Asset::factory()->hasMultipleCustomFields([$customField])->create();
+        $asset->{$customField->db_column} = 'ENG-42';
+        $asset->save();
+
+        $checkoutAcceptance = CheckoutAcceptance::factory()
+            ->pending()
+            ->for($asset, 'checkoutable')
+            ->create();
+
+        $this->actingAs($checkoutAcceptance->assignedTo)
+            ->post(route('account.store-acceptance', $checkoutAcceptance), [
+                'asset_acceptance' => 'accepted',
+            ])
+            ->assertSessionHasNoErrors();
+
+        Notification::assertSentTo(
+            $checkoutAcceptance,
+            function (AcceptanceItemAcceptedNotification $notification) {
+                $rendered = $notification->toMail()->render();
+
+                $this->assertStringContainsString('Cost Center', $rendered);
+                $this->assertStringContainsString('ENG-42', $rendered);
+
+                return true;
+            }
+        );
+    }
+
+    public function test_admin_acceptance_email_does_not_contain_encrypted_custom_fields(): void
+    {
+        Notification::fake();
+        $this->settings->enableAlertEmail();
+
+        $customField = CustomField::factory()->create([
+            'name' => 'SSN',
+            'show_in_email' => '1',
+            'field_encrypted' => '1',
+        ])->fresh();
+
+        $asset = Asset::factory()->hasMultipleCustomFields([$customField])->create();
+        $asset->{$customField->db_column} = '123-45-6789';
+        $asset->save();
+
+        $checkoutAcceptance = CheckoutAcceptance::factory()
+            ->pending()
+            ->for($asset, 'checkoutable')
+            ->create();
+
+        $this->actingAs($checkoutAcceptance->assignedTo)
+            ->post(route('account.store-acceptance', $checkoutAcceptance), [
+                'asset_acceptance' => 'accepted',
+            ])
+            ->assertSessionHasNoErrors();
+
+        Notification::assertSentTo(
+            $checkoutAcceptance,
+            function (AcceptanceItemAcceptedNotification $notification) {
+                $rendered = $notification->toMail()->render();
+
+                $this->assertStringNotContainsString('SSN', $rendered);
+                $this->assertStringNotContainsString('123-45-6789', $rendered);
+
+                return true;
+            }
+        );
+    }
+
     public function test_action_logged_when_declining_asset()
     {
         $checkoutAcceptance = CheckoutAcceptance::factory()->pending()->create();
@@ -346,5 +428,43 @@ class AssetAcceptanceTest extends TestCase
         $response->assertOk();
         $response->assertSee(trans('mail.send_pdf_copy'), false);
         $response->assertDontSee(trans('general.acceptance_email_always_sent'), false);
+    }
+
+    public function test_acceptance_create_page_hides_checkbox_when_always_send_eula_enabled(): void
+    {
+        $checkoutAcceptance = CheckoutAcceptance::factory()->pending()->create();
+        config([
+            'app.always_send_email' => false,
+            'app.always_send_eula' => true,
+        ]);
+
+        $response = $this->actingAs($checkoutAcceptance->assignedTo)
+            ->get(route('account.accept.item', $checkoutAcceptance));
+
+        $response->assertOk();
+        $response->assertSee(trans('general.acceptance_email_always_sent'), false);
+        $response->assertDontSee(trans('mail.send_pdf_copy'), false);
+    }
+
+    public function test_acceptance_always_sends_copy_when_always_send_eula_enabled(): void
+    {
+        Notification::fake();
+
+        $checkoutAcceptance = CheckoutAcceptance::factory()->pending()->create();
+        config([
+            'app.always_send_email' => false,
+            'app.always_send_eula' => true,
+        ]);
+
+        $this->actingAs($checkoutAcceptance->assignedTo)
+            ->post(route('account.store-acceptance', $checkoutAcceptance), [
+                'asset_acceptance' => 'accepted',
+            ])
+            ->assertSessionHasNoErrors();
+
+        Notification::assertSentTo(
+            $checkoutAcceptance->assignedTo,
+            AcceptanceItemAcceptedToUserNotification::class
+        );
     }
 }

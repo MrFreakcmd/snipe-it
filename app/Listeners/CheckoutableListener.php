@@ -78,7 +78,7 @@ class CheckoutableListener
         $acceptance = $this->getCheckoutAcceptance($event);
 
         $shouldSendEmailToUser = $this->shouldSendCheckoutEmailToUser($event->checkoutable);
-        $shouldSendEmailToAlertAddress = $this->shouldSendEmailToAlertAddress($acceptance);
+        $shouldSendEmailToAlertAddress = $this->shouldSendEmailToAlertAddress($acceptance, $event->checkoutable);
         $shouldSendWebhookNotification = $this->shouldSendWebhookNotification();
 
         if ($this->shouldSkipInitialAcceptanceEmail($event, $acceptance)) {
@@ -175,7 +175,7 @@ class CheckoutableListener
         }
 
         $shouldSendEmailToUser = $this->checkoutableCategoryShouldSendEmail($event->checkoutable);
-        $shouldSendEmailToAlertAddress = $this->shouldSendEmailToAlertAddress();
+        $shouldSendEmailToAlertAddress = $this->shouldSendEmailToAlertAddress(null, $event->checkoutable);
         $shouldSendWebhookNotification = $this->shouldSendWebhookNotification();
         if (! $shouldSendEmailToUser && ! $shouldSendEmailToAlertAddress && ! $shouldSendWebhookNotification) {
             return;
@@ -500,7 +500,7 @@ class CheckoutableListener
         return ($acceptance instanceof CheckoutAcceptance) || ! empty($event->checkoutable->getEula());
     }
 
-    private function shouldSendEmailToAlertAddress($acceptance = null): bool
+    private function shouldSendEmailToAlertAddress($acceptance = null, ?Model $checkoutable = null): bool
     {
         if (Context::get('action') === 'bulk_asset_checkout') {
             return false;
@@ -513,21 +513,32 @@ class CheckoutableListener
         }
 
         if (is_null($acceptance) && ! $setting->admin_cc_always) {
-            return false;
+            if (! $checkoutable || ! $this->checkoutableCategoryShouldSendEmail($checkoutable)) {
+                return false;
+            }
         }
 
-        return (bool) $setting->admin_cc_email;
+        return ! empty($this->getFormattedAlertAddresses());
     }
 
     private function getFormattedAlertAddresses(): array
     {
-        $alertAddresses = Setting::getSettings()->admin_cc_email;
+        $setting = Setting::getSettings();
 
-        if ($alertAddresses !== '') {
-            return array_filter(array_map('trim', explode(',', $alertAddresses)));
+        if (! $setting) {
+            return [];
         }
 
-        return [];
+        $adminCcAddresses = $setting->admin_cc_email;
+        $fallbackAlertAddresses = $setting->alert_email;
+
+        $rawAddresses = $adminCcAddresses ?: $fallbackAlertAddresses;
+
+        if ($rawAddresses === null || $rawAddresses === '') {
+            return [];
+        }
+
+        return array_values(array_unique(array_filter(array_map('trim', explode(',', $rawAddresses)))));
     }
 
     private function generateEmailRecipients(

@@ -181,6 +181,26 @@ class AcceptanceController extends Controller
             $encoded_logo = base64_encode(file_get_contents(public_path().'/uploads/'.basename($settings->acceptance_pdf_logo)));
         }
 
+        // Determine signed_in_place and admin for PDF/email output
+        $signedInPlace = $isSignInPlaceAdminFlow ? true : (bool) $acceptance->signed_in_place;
+        $signedInPlaceAdmin = null;
+        if ($isSignInPlaceAdminFlow) {
+            $signedInPlaceAdmin = [
+                'name' => $currentUser->display_name,
+                'username' => $currentUser->username,
+                'email' => $currentUser->email,
+            ];
+        } elseif ($acceptance->signed_in_place && $acceptance->signed_in_place_admin) {
+            $admin = User::find($acceptance->signed_in_place_admin);
+            if ($admin) {
+                $signedInPlaceAdmin = [
+                    'name' => $admin->display_name,
+                    'username' => $admin->username,
+                    'email' => $admin->email,
+                ];
+            }
+        }
+
         // Get the data array ready for the notifications and PDF generation
         $data = [
             'item_tag' => $item->asset_tag,
@@ -202,18 +222,10 @@ class AcceptanceController extends Controller
             'logo' => ($encoded_logo) ?? null,
             'date_settings' => $settings->date_display_format,
             'qty' => $acceptance->qty ?? 1,
+            'signed_in_place' => $signedInPlace,
         ];
-
-        // If signed in place, add admin info for PDF
-        if ($acceptance->signed_in_place && $acceptance->signed_in_place_admin) {
-            $admin = User::find($acceptance->signed_in_place_admin);
-            if ($admin) {
-                $data['signed_in_place_admin'] = [
-                    'name' => $admin->display_name,
-                    'username' => $admin->username,
-                    'email' => $admin->email,
-                ];
-            }
+        if ($signedInPlaceAdmin) {
+            $data['signed_in_place_admin'] = $signedInPlaceAdmin;
         }
 
         // Add custom fields for asset (show_in_email = 1, field_encrypted = 0)
@@ -242,19 +254,15 @@ class AcceptanceController extends Controller
             $pdf_content = $acceptance->generateAcceptancePdf($data, $acceptance);
             Storage::put('private_uploads/eula-pdfs/'.$pdf_filename, $pdf_content);
 
-            // Set sign_in_place fields if this is a sign-in-place admin flow
-            if ($isSignInPlaceAdminFlow) {
-                $acceptance->signed_in_place = true;
-                $acceptance->signed_in_place_admin = $currentUser->id;
-                $acceptance->save();
-            }
 
             // Log the acceptance
             $accept_qty = $request->input('accept_qty', $acceptance->qty ?? 1);
             $acceptance->accept($sig_filename, $item->getEula(), $pdf_filename, $request->input('note'), $accept_qty);
 
+            $alwaysSendAcceptanceCopy = (bool) (config('app.always_send_email') || config('app.always_send_eula'));
+
             // Send the PDF to the signing user
-            if (($request->input('send_copy') === '1') && ($assignedUser->email !== '')) {
+            if (($alwaysSendAcceptanceCopy || ($request->input('send_copy') === '1')) && ($assignedUser->email !== '')) {
 
                 // Add the attachment for the signing user into the $data array
                 $data['file'] = $pdf_filename;

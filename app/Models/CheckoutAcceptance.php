@@ -292,21 +292,24 @@ class CheckoutAcceptance extends Model
             }
             $pdf->writeHTML($assigningUserLine, true, 0, true, 0, '');
         }
-        // Add signed in place if present
-        if (! empty($data['signed_in_place'])) {
-            $pdf->writeHTML(trans('general.signed_in_place').': '.(filter_var($data['signed_in_place'], FILTER_VALIDATE_BOOLEAN) ? trans('general.yes') : trans('general.no')), true, 0, true, 0, '');
-            // If signed in place, show admin info
-            if (! empty($data['signed_in_place_admin'])) {
-                $admin = $data['signed_in_place_admin'];
-                $adminLine = trans('general.signed_in_place_admin').': '.e($admin['name']);
-                if (! empty($admin['username'])) {
-                    $adminLine .= ' ('.e($admin['username']).')';
-                }
-                if (! empty($admin['email'])) {
-                    $adminLine .= ' <'.e($admin['email']).'>';
-                }
-                $pdf->writeHTML($adminLine, true, 0, true, 0, '');
+        // Add signed in place row (always show)
+        $signedInPlace = !empty($data['signed_in_place']) && filter_var($data['signed_in_place'], FILTER_VALIDATE_BOOLEAN);
+        $pdf->writeHTML(trans('general.signed_in_place') . ': ' . ($signedInPlace ? trans('general.yes') : trans('general.no')), true, 0, true, 0, '');
+        // If signed in place, show admin info
+        if ($signedInPlace && !empty($data['signed_in_place_admin'])) {
+            $admin = $data['signed_in_place_admin'];
+            $adminName = $admin['name'] ?? '';
+            $adminUsername = $admin['username'] ?? '';
+            $adminEmail = $admin['email'] ?? '';
+            $adminDetails = $adminName;
+            if (!empty($adminUsername)) {
+                $adminDetails .= ' (' . $adminUsername . ')';
             }
+            if (!empty($adminEmail)) {
+                $adminDetails .= ' <' . $adminEmail . '>';
+            }
+            $adminLine = trans('general.signed_in_place_admin', ['admin' => $adminDetails]);
+            $pdf->writeHTML($adminLine, true, 0, true, 0, '');
         }
 
         $pdf->Ln();

@@ -9,7 +9,7 @@
 @if (isset($item_name))
 | **{{ trans('general.item_name') }}** | {{ $item_name }} |
 @endif
-| **{{ trans('mail.user') }} | {{ $assigned_to }} |
+| **{{ trans('mail.user') }}** | {{ $assigned_to }} |
 @if (isset($user->location))
 | **{{ trans('general.location') }}** | {{ $user->location->name }} |
 @endif
@@ -43,8 +43,28 @@
 @if (isset($qty))
 | **{{ trans('general.qty') }}** | {{ $qty }} |
 @endif
-@if(isset($signed_in_place_admin) && is_array($signed_in_place_admin))
-| **{{ trans('general.signed_in_place_admin', ['admin' => $signed_in_place_admin['name']]) }}** | {{ $signed_in_place_admin['name'] }}@if(!empty($signed_in_place_admin['username'])) ({{ $signed_in_place_admin['username'] }})@endif@if(!empty($signed_in_place_admin['email'])) &lt;{{ $signed_in_place_admin['email'] }}&gt;@endif |
+@if (!empty($custom_fields) && is_iterable($custom_fields))
+@foreach ($custom_fields as $customField)
+@if (!empty($customField['label']) && array_key_exists('value', $customField) && $customField['value'] !== '')
+| **{{ $customField['label'] }}** | {{ $customField['value'] }} |
+@endif
+@endforeach
+@endif
+| **{{ trans('general.signed_in_place') }}** | {{ isset($signed_in_place) && $signed_in_place ? trans('general.yes') : trans('general.no') }} |
+@if(isset($signed_in_place) && $signed_in_place && isset($signed_in_place_admin) && is_array($signed_in_place_admin))
+    @php
+        $adminName = $signed_in_place_admin['name'] ?? '';
+        $adminUsername = $signed_in_place_admin['username'] ?? '';
+        $adminEmail = $signed_in_place_admin['email'] ?? '';
+        $adminDetails = $adminName;
+        if (!empty($adminUsername)) {
+            $adminDetails .= ' (' . $adminUsername . ')';
+        }
+        if (!empty($adminEmail)) {
+            $adminDetails .= ' <' . $adminEmail . '>';
+        }
+    @endphp
+    | **{{ trans('general.signed_in_place_admin', ['admin' => $adminDetails]) }}** | {{ trans('general.signed_in_place_admin', ['admin' => $adminDetails]) }} |
 @endif
 @endcomponent
 

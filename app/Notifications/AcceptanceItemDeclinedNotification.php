@@ -32,6 +32,7 @@ class AcceptanceItemDeclinedNotification extends Notification
         $this->settings = Setting::getSettings();
         $this->qty = $params['qty'] ?? null;
         $this->admin = $params['admin'] ?? null;
+        $this->custom_fields = $params['custom_fields'] ?? [];
     }
 
     /**
@@ -74,6 +75,7 @@ class AcceptanceItemDeclinedNotification extends Notification
                 'company_name' => $this->company_name,
                 'qty' => $this->qty,
                 'admin' => $this->admin,
+                'custom_fields' => $this->custom_fields,
                 'user' => $this->assigned_to,
                 'intro_text' => trans('mail.acceptance_declined_greeting', ['user' => $this->assigned_to]),
             ])

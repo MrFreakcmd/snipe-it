@@ -125,7 +125,7 @@
                         <div class="row">
                             <div class="col-md-7">
                                 @if ($acceptance->assignedTo?->email)
-                                    @if (config('app.always_send_email'))
+                                    @if (config('app.always_send_email') || config('app.always_send_eula'))
                                         <div class="col-md-12" id="emailInfoBox">
                                             {{ trans('general.acceptance_email_always_sent') }} ({{ $acceptance->assignedTo->email }})
                                         </div>
