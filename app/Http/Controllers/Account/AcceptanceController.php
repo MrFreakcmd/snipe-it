@@ -254,7 +254,6 @@ class AcceptanceController extends Controller
             $pdf_content = $acceptance->generateAcceptancePdf($data, $acceptance);
             Storage::put('private_uploads/eula-pdfs/'.$pdf_filename, $pdf_content);
 
-
             // Log the acceptance
             $accept_qty = $request->input('accept_qty', $acceptance->qty ?? 1);
             $acceptance->accept($sig_filename, $item->getEula(), $pdf_filename, $request->input('note'), $accept_qty);
