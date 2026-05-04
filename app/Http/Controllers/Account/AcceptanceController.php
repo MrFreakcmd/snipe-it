@@ -181,6 +181,13 @@ class AcceptanceController extends Controller
             $encoded_logo = base64_encode(file_get_contents(public_path().'/uploads/'.basename($settings->acceptance_pdf_logo)));
         }
 
+        if ($isSignInPlaceAdminFlow && (! $acceptance->signed_in_place || (int) $acceptance->signed_in_place_admin !== (int) $currentUser->id)) {
+            $acceptance->forceFill([
+                'signed_in_place' => true,
+                'signed_in_place_admin' => $currentUser->id,
+            ])->save();
+        }
+
         // Determine signed_in_place and admin for PDF/email output
         $signedInPlace = $isSignInPlaceAdminFlow ? true : (bool) $acceptance->signed_in_place;
         $signedInPlaceAdmin = null;

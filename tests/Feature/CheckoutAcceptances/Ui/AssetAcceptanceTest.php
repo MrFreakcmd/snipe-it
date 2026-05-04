@@ -314,7 +314,11 @@ class AssetAcceptanceTest extends TestCase
             ])
             ->assertRedirect(route('users.show', $assignee));
 
-        $this->assertNotNull($checkoutAcceptance->refresh()->accepted_at);
+        $checkoutAcceptance->refresh();
+
+        $this->assertNotNull($checkoutAcceptance->accepted_at);
+        $this->assertTrue((bool) $checkoutAcceptance->signed_in_place);
+        $this->assertSame($admin->id, $checkoutAcceptance->signed_in_place_admin);
         Event::assertDispatched(CheckoutAccepted::class);
     }
 
