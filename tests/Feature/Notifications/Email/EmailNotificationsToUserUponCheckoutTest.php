@@ -108,6 +108,11 @@ class EmailNotificationsToUserUponCheckoutTest extends TestCase
 
     public function test_handles_user_not_having_email_address_set()
     {
+        $this->settings
+            ->disableAdminCC()
+            ->disableAdminCCAlways()
+            ->disableAlertEmail();
+
         $this->category->update(['checkin_email' => true]);
         $this->user->update(['email' => null]);
 

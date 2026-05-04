@@ -198,33 +198,39 @@ class CheckoutableListener
             }
 
             $mailable = $this->getCheckinMailType($event);
-            $notifiable = $this->getNotifiableUser($event);
 
-            $notifiableHasEmail = $notifiable instanceof User && $notifiable->email;
+            if (! $mailable) {
+                Log::debug('No checkin mail type available for checkoutable class: '.get_class($event->checkoutable));
+            } else {
+                $notifiable = $this->getNotifiableUser($event);
 
-            $shouldSendEmailToUser = $shouldSendEmailToUser && $notifiableHasEmail;
+                $notifiableHasEmail = $notifiable instanceof User && $notifiable->email;
 
-            [$to, $cc] = $this->generateEmailRecipients($shouldSendEmailToUser, $shouldSendEmailToAlertAddress, $notifiable);
+                $shouldSendEmailToUser = $shouldSendEmailToUser && $notifiableHasEmail;
 
-            if (! empty($to)) {
-                try {
-                    $toMail = (clone $mailable)->locale($notifiable->locale);
-                    Mail::to(array_flatten($to))->send($toMail);
-                    Log::info('Checkin Mail sent to checkin target');
-                } catch (ClientException $e) {
-                    Log::debug('Exception caught during checkin email: '.$e->getMessage());
-                } catch (Exception $e) {
-                    Log::debug('Exception caught during checkin email: '.$e->getMessage());
+                [$to, $cc] = $this->generateEmailRecipients($shouldSendEmailToUser, $shouldSendEmailToAlertAddress, $notifiable);
+
+                if (! empty($to)) {
+                    try {
+                        $toMail = (clone $mailable)->locale($notifiable->locale);
+                        Mail::to(array_flatten($to))->send($toMail);
+                        Log::info('Checkin Mail sent to checkin target');
+                    } catch (ClientException $e) {
+                        Log::debug('Exception caught during checkin email: '.$e->getMessage());
+                    } catch (Exception $e) {
+                        Log::debug('Exception caught during checkin email: '.$e->getMessage());
+                    }
                 }
-            }
-            if (! empty($cc)) {
-                try {
-                    $ccMail = (clone $mailable)->locale(Setting::getSettings()->locale);
-                    Mail::cc(array_flatten($cc))->send($ccMail);
-                } catch (ClientException $e) {
-                    Log::debug('Exception caught during checkin email: '.$e->getMessage());
-                } catch (Exception $e) {
-                    Log::debug('Exception caught during checkin email: '.$e->getMessage());
+
+                if (! empty($cc)) {
+                    try {
+                        $ccMail = (clone $mailable)->locale(Setting::getSettings()->locale);
+                        Mail::cc(array_flatten($cc))->send($ccMail);
+                    } catch (ClientException $e) {
+                        Log::debug('Exception caught during checkin email: '.$e->getMessage());
+                    } catch (Exception $e) {
+                        Log::debug('Exception caught during checkin email: '.$e->getMessage());
+                    }
                 }
             }
         }
@@ -392,7 +398,14 @@ class CheckoutableListener
             LicenseSeat::class => CheckinLicenseMail::class,
             Component::class => CheckinComponentMail::class,
         ];
-        $mailable = $lookup[get_class($event->checkoutable)];
+
+        $checkoutableClass = get_class($event->checkoutable);
+
+        if (! array_key_exists($checkoutableClass, $lookup)) {
+            return null;
+        }
+
+        $mailable = $lookup[$checkoutableClass];
 
         return new $mailable($event->checkoutable, $event->checkedOutTo, $event->checkedInBy, $event->note);
 
@@ -512,16 +525,22 @@ class CheckoutableListener
             return false;
         }
 
+        $alertRecipients = $this->getFormattedAlertAddresses((bool) $setting->admin_cc_always);
+
+        if (empty($alertRecipients)) {
+            return false;
+        }
+
         if (is_null($acceptance) && ! $setting->admin_cc_always) {
             if (! $checkoutable || ! $this->checkoutableCategoryShouldSendEmail($checkoutable)) {
                 return false;
             }
         }
 
-        return ! empty($this->getFormattedAlertAddresses());
+        return true;
     }
 
-    private function getFormattedAlertAddresses(): array
+    private function getFormattedAlertAddresses(bool $allowAlertEmailFallback = false): array
     {
         $setting = Setting::getSettings();
 
@@ -530,7 +549,7 @@ class CheckoutableListener
         }
 
         $adminCcAddresses = $setting->admin_cc_email;
-        $fallbackAlertAddresses = $setting->alert_email;
+        $fallbackAlertAddresses = $allowAlertEmailFallback ? $setting->alert_email : null;
 
         $rawAddresses = $adminCcAddresses ?: $fallbackAlertAddresses;
 
@@ -552,7 +571,7 @@ class CheckoutableListener
         // if user && cc: to user, cc admin
         if ($shouldSendEmailToUser && $shouldSendEmailToAlertAddress) {
             $to[] = $notifiable;
-            $cc[] = $this->getFormattedAlertAddresses();
+            $cc[] = $this->getFormattedAlertAddresses(true);
         }
 
         // if user && no cc: to user
@@ -562,7 +581,7 @@ class CheckoutableListener
 
         // if no user && cc: to admin
         if (! $shouldSendEmailToUser && $shouldSendEmailToAlertAddress) {
-            $to[] = $this->getFormattedAlertAddresses();
+            $to[] = $this->getFormattedAlertAddresses(true);
         }
 
         return [$to, $cc];

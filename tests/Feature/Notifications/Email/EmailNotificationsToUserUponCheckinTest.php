@@ -89,6 +89,11 @@ class EmailNotificationsToUserUponCheckinTest extends TestCase
 
     public function test_handles_user_not_having_email_address_set()
     {
+        $this->settings
+            ->disableAdminCC()
+            ->disableAdminCCAlways()
+            ->disableAlertEmail();
+
         $user = User::factory()->create(['email' => null]);
         $asset = Asset::factory()->assignedToUser($user)->create();
 
