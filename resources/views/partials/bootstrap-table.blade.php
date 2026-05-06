@@ -497,6 +497,40 @@
                 return default_value;
             }
 
+            var renderBootstrapTableLoadErrorState = function ($table, attempt) {
+                attempt = attempt || 0;
+                var $wrapper = $table.closest('.bootstrap-table');
+
+                if (!$wrapper.length) {
+                    return;
+                }
+
+                var errorHtml = '<div class="text-danger">'
+                    + '<i class="fas fa-triangle-exclamation" aria-hidden="true"></i> '
+                    + '{{ trans('general.search_load_error_short') }}'
+                    + '<div class="text-muted" style="margin-top: 4px;">{{ trans('general.search_load_error_help') }}</div>'
+                    + '</div>';
+
+                var $targets = $wrapper.find('.fixed-table-body .no-records-found td, .fixed-table-body .fixed-table-loading');
+
+                if (!$targets.length) {
+                    // On initial load errors, bootstrap-table may insert the no-records row
+                    // after onLoadError has fired. Retry briefly so first render also shows
+                    // the error state instead of the default "no matching records" text.
+                    // Initial table bootstrap can lag behind onLoadError by quite a bit depending
+                    // on browser/layout timing. Keep retrying briefly so first-page errors are caught.
+                    if (attempt < 80) {
+                        setTimeout(function () {
+                            renderBootstrapTableLoadErrorState($table, attempt + 1);
+                        }, 50);
+                    }
+
+                    return;
+                }
+
+                $targets.html(errorHtml);
+            };
+
 
 
             var initialAdvancedSearchOperator = getStoredAdvancedSearchOperator() || normalizeAdvancedSearchOperator(data_with_default('advanced-search-operator', defaultAdvancedSearchOperator));
@@ -607,7 +641,27 @@
                 exportOptions: export_options,
                 exportTypes: ['xlsx', 'excel', 'csv', 'pdf', 'json', 'xml', 'txt', 'sql', 'doc'],
                 onLoadSuccess: function () { // possible 'fixme'? this might be for contents, not for headers?
+                    // Clear transport/server error state so genuine empty results show normal messaging.
+                    $(this).data('bs-table-load-error', false);
                     $('[data-tooltip="true"]').tooltip(); // Needed to attach tooltips after ajax call
+                },
+                onLoadError: function () {
+                    // Mark this table as failed so formatNoMatches can render an explicit error state
+                    // instead of the misleading "no records" empty-state message.
+                    var $table = $(this);
+                    $table.data('bs-table-load-error', true);
+
+                    // On first page load, bootstrap-table may already have rendered the default
+                    // no-records row. Force-replace that content immediately after the error.
+                    renderBootstrapTableLoadErrorState($table);
+                },
+                onPostBody: function () {
+                    // Keep the error empty-state stable if bootstrap-table re-renders body rows
+                    // while the current table state is still a transport/server error.
+                    var $table = $(this);
+                    if ($table.data('bs-table-load-error') === true) {
+                        renderBootstrapTableLoadErrorState($table);
+                    }
                 },
                 onPostHeader: function () {
                     var lookup = {};
@@ -666,9 +720,33 @@
 
                 },
                 formatNoMatches: function () {
+                    if ($(this).data('bs-table-load-error') === true) {
+                        return '<div class="text-danger" style="padding: 8px 0;">'
+                            + '<i class="fas fa-triangle-exclamation" aria-hidden="true" style="margin-right: 6px;"></i>'
+                            + '{{ trans('general.search_load_error_short') }}'
+                            + '<div class="text-muted" style="margin-top: 4px;">{{ trans('general.search_load_error_help') }}</div>'
+                            + '</div>';
+                    }
+
                     return '{{ trans('table.no_matching_records') }}';
                 }
 
+            });
+
+            // Event-driven fallback for initial-load timing/callback-context edge cases.
+            // In some bootstrap-table flows, onLoadError can race before the empty row exists
+            // or callback context may not be the raw table element. These events are emitted
+            // from the table node itself and are reliable across initial load and searches.
+            var $currentTable = $(this);
+            $currentTable.off('.snipeLoadState').on('load-success.bs.table.snipeLoadState', function () {
+                $currentTable.data('bs-table-load-error', false);
+            }).on('load-error.bs.table.snipeLoadState', function () {
+                $currentTable.data('bs-table-load-error', true);
+                renderBootstrapTableLoadErrorState($currentTable);
+            }).on('post-body.bs.table.snipeLoadState', function () {
+                if ($currentTable.data('bs-table-load-error') === true) {
+                    renderBootstrapTableLoadErrorState($currentTable);
+                }
             });
 
             var bootstrapTableInstance = $(this).data('bootstrap.table');
