@@ -505,9 +505,12 @@
                     return;
                 }
 
+                var statusCode = parseInt($table.data('bs-table-load-error-status'), 10);
+                var statusSuffix = Number.isFinite(statusCode) && statusCode > 0 ? ' (HTTP ' + statusCode + ')' : '';
+
                 var errorHtml = '<div class="text-danger">'
                     + '<i class="fas fa-triangle-exclamation" aria-hidden="true"></i> '
-                    + '{{ trans('general.search_load_error_short') }}'
+                    + '{{ trans('general.search_load_error_short') }}' + statusSuffix
                     + '<div class="text-muted" style="margin-top: 4px;">{{ trans('general.search_load_error_help') }}</div>'
                     + '</div>';
 
@@ -529,6 +532,25 @@
                 }
 
                 $targets.html(errorHtml);
+            };
+
+            var resolveHttpStatusFromLoadErrorArgs = function () {
+                for (var i = 0; i < arguments.length; i++) {
+                    var arg = arguments[i];
+                    if (!arg) {
+                        continue;
+                    }
+
+                    if (typeof arg === 'number' && arg > 0) {
+                        return arg;
+                    }
+
+                    if (typeof arg === 'object' && typeof arg.status === 'number' && arg.status > 0) {
+                        return arg.status;
+                    }
+                }
+
+                return null;
             };
 
 
@@ -643,6 +665,7 @@
                 onLoadSuccess: function () { // possible 'fixme'? this might be for contents, not for headers?
                     // Clear transport/server error state so genuine empty results show normal messaging.
                     $(this).data('bs-table-load-error', false);
+                    $(this).removeData('bs-table-load-error-status');
                     $('[data-tooltip="true"]').tooltip(); // Needed to attach tooltips after ajax call
                 },
                 onLoadError: function () {
@@ -650,6 +673,10 @@
                     // instead of the misleading "no records" empty-state message.
                     var $table = $(this);
                     $table.data('bs-table-load-error', true);
+                    var statusCode = resolveHttpStatusFromLoadErrorArgs.apply(null, arguments);
+                    if (statusCode) {
+                        $table.data('bs-table-load-error-status', statusCode);
+                    }
 
                     // On first page load, bootstrap-table may already have rendered the default
                     // no-records row. Force-replace that content immediately after the error.
@@ -721,9 +748,11 @@
                 },
                 formatNoMatches: function () {
                     if ($(this).data('bs-table-load-error') === true) {
+                        var statusCode = parseInt($(this).data('bs-table-load-error-status'), 10);
+                        var statusSuffix = Number.isFinite(statusCode) && statusCode > 0 ? ' (HTTP ' + statusCode + ')' : '';
                         return '<div class="text-danger" style="padding: 8px 0;">'
                             + '<i class="fas fa-triangle-exclamation" aria-hidden="true" style="margin-right: 6px;"></i>'
-                            + '{{ trans('general.search_load_error_short') }}'
+                            + '{{ trans('general.search_load_error_short') }}' + statusSuffix
                             + '<div class="text-muted" style="margin-top: 4px;">{{ trans('general.search_load_error_help') }}</div>'
                             + '</div>';
                     }
@@ -740,8 +769,13 @@
             var $currentTable = $(this);
             $currentTable.off('.snipeLoadState').on('load-success.bs.table.snipeLoadState', function () {
                 $currentTable.data('bs-table-load-error', false);
+                $currentTable.removeData('bs-table-load-error-status');
             }).on('load-error.bs.table.snipeLoadState', function () {
                 $currentTable.data('bs-table-load-error', true);
+                var statusCode = resolveHttpStatusFromLoadErrorArgs.apply(null, Array.prototype.slice.call(arguments, 1));
+                if (statusCode) {
+                    $currentTable.data('bs-table-load-error-status', statusCode);
+                }
                 renderBootstrapTableLoadErrorState($currentTable);
             }).on('post-body.bs.table.snipeLoadState', function () {
                 if ($currentTable.data('bs-table-load-error') === true) {
