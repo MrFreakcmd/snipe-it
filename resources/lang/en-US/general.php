@@ -611,7 +611,7 @@ return [
     'action_source' => 'Action Source',
     'search_tip' => 'Searches return a partial match by default. For more specific results, you can use <code>not:value</code> to exclude, <code>is:value</code> for an exact match, <code>is:null</code> for empty values, and <code>is:not_null</code> for non-empty. (In these examples, <code>value</code> is the text you are searching for.)',
     'search_load_error_short' => 'Could not load records.',
-    'search_load_error_help' => 'An API error has occurred. Check your server logs and confirm migrations are up to date.',
+    'search_load_error_help' => 'An API error has occurred. Check your server logs for errors and confirm migrations are up to date.',
     'or' => 'or',
     'url' => 'URL',
     'phone' => 'Phone',

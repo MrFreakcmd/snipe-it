@@ -497,8 +497,7 @@
                 return default_value;
             }
 
-            var renderBootstrapTableLoadErrorState = function ($table, attempt) {
-                attempt = attempt || 0;
+            var renderBootstrapTableLoadErrorState = function ($table) {
                 var $wrapper = $table.closest('.bootstrap-table');
 
                 if (!$wrapper.length) {
@@ -517,18 +516,45 @@
                 var $targets = $wrapper.find('.fixed-table-body .no-records-found td, .fixed-table-body .fixed-table-loading');
 
                 if (!$targets.length) {
-                    // On initial load errors, bootstrap-table may insert the no-records row
-                    // after onLoadError has fired. Retry briefly so first render also shows
-                    // the error state instead of the default "no matching records" text.
-                    // Initial table bootstrap can lag behind onLoadError by quite a bit depending
-                    // on browser/layout timing. Keep retrying briefly so first-page errors are caught.
-                    if (attempt < 80) {
-                        setTimeout(function () {
-                            renderBootstrapTableLoadErrorState($table, attempt + 1);
-                        }, 50);
+                    // On initial load errors, bootstrap-table can insert the no-records row
+                    // after the load-error callback fires. Observe DOM changes briefly and
+                    // render the error state once the row appears, then disconnect.
+                    var existingObserver = $table.data('bs-table-load-error-observer');
+                    if (existingObserver) {
+                        return;
                     }
 
+                    var wrapperNode = $wrapper.get(0);
+                    if (!wrapperNode || typeof MutationObserver === 'undefined') {
+                        return;
+                    }
+
+                    var observer = new MutationObserver(function () {
+                        if ($table.data('bs-table-load-error') !== true) {
+                            observer.disconnect();
+                            $table.removeData('bs-table-load-error-observer');
+
+                            return;
+                        }
+
+                        var $newTargets = $wrapper.find('.fixed-table-body .no-records-found td, .fixed-table-body .fixed-table-loading');
+                        if ($newTargets.length) {
+                            observer.disconnect();
+                            $table.removeData('bs-table-load-error-observer');
+                            renderBootstrapTableLoadErrorState($table);
+                        }
+                    });
+
+                    observer.observe(wrapperNode, { childList: true, subtree: true });
+                    $table.data('bs-table-load-error-observer', observer);
+
                     return;
+                }
+
+                var activeObserver = $table.data('bs-table-load-error-observer');
+                if (activeObserver) {
+                    activeObserver.disconnect();
+                    $table.removeData('bs-table-load-error-observer');
                 }
 
                 $targets.html(errorHtml);
@@ -666,6 +692,11 @@
                     // Clear transport/server error state so genuine empty results show normal messaging.
                     $(this).data('bs-table-load-error', false);
                     $(this).removeData('bs-table-load-error-status');
+                    var observer = $(this).data('bs-table-load-error-observer');
+                    if (observer) {
+                        observer.disconnect();
+                        $(this).removeData('bs-table-load-error-observer');
+                    }
                     $('[data-tooltip="true"]').tooltip(); // Needed to attach tooltips after ajax call
                 },
                 onLoadError: function () {
