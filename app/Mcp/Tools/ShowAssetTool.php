@@ -21,18 +21,19 @@ class ShowAssetTool extends Tool
     {
         $request->validate([
             'asset_tag' => 'nullable|max:100',
+            'serial' => 'nullable|string|max:255',
             'id' => 'nullable|integer',
         ]);
 
+        $with = ['status', 'model.category', 'model.manufacturer', 'location', 'defaultLoc', 'company', 'supplier', 'adminuser'];
         $asset = null;
 
         if ($request->filled('asset_tag')) {
-            $asset = Asset::where('asset_tag', $request->get('asset_tag'))
-                ->with('status', 'assignedTo', 'model.category', 'model.manufacturer', 'location', 'defaultLoc', 'company', 'supplier', 'adminuser')
-                ->first();
+            $asset = Asset::where('asset_tag', $request->get('asset_tag'))->with($with)->first();
+        } elseif ($request->filled('serial')) {
+            $asset = Asset::where('serial', $request->get('serial'))->with($with)->first();
         } elseif ($request->filled('id')) {
-            $asset = Asset::with('status', 'assignedTo', 'model.category', 'model.manufacturer', 'location', 'defaultLoc', 'company', 'supplier', 'adminuser')
-                ->find($request->get('id'));
+            $asset = Asset::with($with)->find($request->get('id'));
         }
 
         if (! $asset) {
@@ -84,6 +85,8 @@ class ShowAssetTool extends Tool
         return [
             'asset_tag' => $schema->string()
                 ->description('The asset tag of the asset to look up'),
+            'serial' => $schema->string()
+                ->description('The serial number of the asset to look up'),
             'id' => $schema->number()
                 ->description('The numeric ID of the asset to look up'),
         ];

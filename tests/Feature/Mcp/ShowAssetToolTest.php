@@ -41,6 +41,23 @@ class ShowAssetToolTest extends TestCase
         $this->assertEquals($asset->id, $content['id']);
     }
 
+    public function test_finds_asset_by_serial()
+    {
+        $asset = Asset::factory()->create(['serial' => 'SN-FIND-001']);
+
+        $content = $this->handle(['serial' => 'SN-FIND-001'])->getStructuredContent();
+
+        $this->assertEquals('SN-FIND-001', $content['serial']);
+        $this->assertEquals($asset->id, $content['id']);
+    }
+
+    public function test_returns_error_when_serial_not_found()
+    {
+        $response = $this->handle(['serial' => 'DOES-NOT-EXIST']);
+
+        $this->assertTrue($response->responses()->first()->isError());
+    }
+
     public function test_finds_asset_by_numeric_id()
     {
         $asset = Asset::factory()->create();
