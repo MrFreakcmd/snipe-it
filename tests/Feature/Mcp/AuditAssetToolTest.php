@@ -52,9 +52,7 @@ class AuditAssetToolTest extends TestCase
 
     public function test_returns_error_when_asset_not_found()
     {
-        $content = $this->handle(['asset_tag' => 'DOES-NOT-EXIST'])->getStructuredContent();
-
-        $this->assertTrue($content['error']);
+        $this->assertTrue($this->handle(['asset_tag' => 'DOES-NOT-EXIST'])->responses()->first()->isError());
     }
 
     public function test_sets_last_audit_date_to_now()
@@ -71,12 +69,12 @@ class AuditAssetToolTest extends TestCase
         $asset = Asset::factory()->create();
 
         $this->handle([
-            'asset_tag'       => $asset->asset_tag,
+            'asset_tag' => $asset->asset_tag,
             'next_audit_date' => '2027-01-15',
         ]);
 
         $this->assertDatabaseHas('assets', [
-            'id'              => $asset->id,
+            'id' => $asset->id,
             'next_audit_date' => '2027-01-15',
         ]);
     }
@@ -84,15 +82,15 @@ class AuditAssetToolTest extends TestCase
     public function test_updates_location_when_provided()
     {
         $location = Location::factory()->create();
-        $asset    = Asset::factory()->create();
+        $asset = Asset::factory()->create();
 
         $this->handle([
-            'asset_tag'   => $asset->asset_tag,
+            'asset_tag' => $asset->asset_tag,
             'location_id' => $location->id,
         ]);
 
         $this->assertDatabaseHas('assets', [
-            'id'          => $asset->id,
+            'id' => $asset->id,
             'location_id' => $location->id,
         ]);
     }
@@ -100,12 +98,12 @@ class AuditAssetToolTest extends TestCase
     public function test_does_not_change_location_when_not_provided()
     {
         $location = Location::factory()->create();
-        $asset    = Asset::factory()->create(['location_id' => $location->id]);
+        $asset = Asset::factory()->create(['location_id' => $location->id]);
 
         $this->handle(['asset_tag' => $asset->asset_tag]);
 
         $this->assertDatabaseHas('assets', [
-            'id'          => $asset->id,
+            'id' => $asset->id,
             'location_id' => $location->id,
         ]);
     }
@@ -128,12 +126,12 @@ class AuditAssetToolTest extends TestCase
 
         $this->handle([
             'asset_tag' => $asset->asset_tag,
-            'note'      => 'MCP audit note',
+            'note' => 'MCP audit note',
         ]);
 
         $this->assertDatabaseHas('action_logs', [
             'item_type' => Asset::class,
-            'item_id'   => $asset->id,
+            'item_id' => $asset->id,
             'action_type' => 'audit',
         ]);
     }

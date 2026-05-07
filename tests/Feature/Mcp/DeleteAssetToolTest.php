@@ -56,16 +56,14 @@ class DeleteAssetToolTest extends TestCase
 
     public function test_returns_error_when_asset_not_found()
     {
-        $content = $this->handle(['asset_tag' => 'DOES-NOT-EXIST'])->getStructuredContent();
-
-        $this->assertTrue($content['error']);
+        $this->assertTrue($this->handle(['asset_tag' => 'DOES-NOT-EXIST'])->responses()->first()->isError());
     }
 
     public function test_checks_in_asset_before_deleting_when_checked_out()
     {
         Event::fake([CheckoutableCheckedIn::class]);
 
-        $user  = User::factory()->create();
+        $user = User::factory()->create();
         $asset = Asset::factory()->assignedToUser($user)->create();
 
         $this->handle(['asset_tag' => $asset->asset_tag]);

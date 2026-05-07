@@ -16,10 +16,15 @@ use Tests\TestCase;
 class FmcsCompanyScopingTest extends TestCase
 {
     private Company $companyA;
+
     private Company $companyB;
+
     private Asset $assetA;
+
     private Asset $assetB;
+
     private User $userInCompanyA;
+
     private User $superUser;
 
     protected function setUp(): void
@@ -43,12 +48,12 @@ class FmcsCompanyScopingTest extends TestCase
     {
         $this->actingAs($this->userInCompanyA);
 
-        $content = (new UpdateAssetTool)->handle(new Request([
+        $response = (new UpdateAssetTool)->handle(new Request([
             'asset_tag' => $this->assetB->asset_tag,
             'name'      => 'Should Not Apply',
-        ]))->getStructuredContent();
+        ]));
 
-        $this->assertTrue($content['error']);
+        $this->assertTrue($response->responses()->first()->isError());
         $this->assertDatabaseMissing('assets', ['id' => $this->assetB->id, 'name' => 'Should Not Apply']);
     }
 
@@ -71,11 +76,11 @@ class FmcsCompanyScopingTest extends TestCase
     {
         $this->actingAs($this->userInCompanyA);
 
-        $content = (new DeleteAssetTool)->handle(new Request([
+        $response = (new DeleteAssetTool)->handle(new Request([
             'asset_tag' => $this->assetB->asset_tag,
-        ]))->getStructuredContent();
+        ]));
 
-        $this->assertTrue($content['error']);
+        $this->assertTrue($response->responses()->first()->isError());
         $this->assertNotSoftDeleted($this->assetB);
     }
 
@@ -120,23 +125,23 @@ class FmcsCompanyScopingTest extends TestCase
 
     public function test_checkin_blocked_for_cross_company_asset()
     {
-        $user            = User::factory()->create();
+        $user            = $this->companyB->users()->save(User::factory()->make());
         $checkedOutAsset = Asset::factory()->for($this->companyB)->assignedToUser($user)->create();
 
         $this->actingAs($this->userInCompanyA);
 
-        $content = (new CheckinAssetTool)->handle(new Request([
+        $response = (new CheckinAssetTool)->handle(new Request([
             'asset_tag' => $checkedOutAsset->asset_tag,
-        ]))->getStructuredContent();
+        ]));
 
-        $this->assertTrue($content['error']);
+        $this->assertTrue($response->responses()->first()->isError());
         $this->assertDatabaseHas('assets', ['id' => $checkedOutAsset->id, 'assigned_to' => $user->id]);
     }
 
     public function test_checkin_allowed_for_same_company_asset()
     {
-        $user        = User::factory()->create();
-        $asset       = Asset::factory()->for($this->companyA)->assignedToUser($user)->create();
+        $user  = $this->companyA->users()->save(User::factory()->make());
+        $asset = Asset::factory()->for($this->companyA)->assignedToUser($user)->create();
 
         $this->actingAs($this->userInCompanyA);
 
@@ -152,23 +157,23 @@ class FmcsCompanyScopingTest extends TestCase
 
     public function test_checkout_blocked_for_cross_company_asset()
     {
-        $user = User::factory()->create();
+        $user = $this->companyA->users()->save(User::factory()->make());
 
         $this->actingAs($this->userInCompanyA);
 
-        $content = (new CheckoutAssetTool)->handle(new Request([
+        $response = (new CheckoutAssetTool)->handle(new Request([
             'asset_tag'        => $this->assetB->asset_tag,
             'checkout_to_type' => 'user',
             'assigned_user'    => $user->id,
-        ]))->getStructuredContent();
+        ]));
 
-        $this->assertTrue($content['error']);
+        $this->assertTrue($response->responses()->first()->isError());
         $this->assertDatabaseHas('assets', ['id' => $this->assetB->id, 'assigned_to' => null]);
     }
 
     public function test_checkout_allowed_for_same_company_asset()
     {
-        $user = User::factory()->create();
+        $user = $this->companyA->users()->save(User::factory()->make());
 
         $this->actingAs($this->userInCompanyA);
 

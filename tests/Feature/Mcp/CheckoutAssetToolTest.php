@@ -96,13 +96,11 @@ class CheckoutAssetToolTest extends TestCase
 
     public function test_returns_error_when_asset_tag_not_found()
     {
-        $content = $this->handle([
+        $this->assertTrue($this->handle([
             'asset_tag' => 'DOES-NOT-EXIST',
             'checkout_to_type' => 'user',
             'assigned_user' => User::factory()->create()->id,
-        ])->getStructuredContent();
-
-        $this->assertTrue($content['error']);
+        ])->responses()->first()->isError());
     }
 
     public function test_returns_error_when_asset_already_checked_out()
@@ -111,13 +109,12 @@ class CheckoutAssetToolTest extends TestCase
         $asset = Asset::factory()->assignedToUser($existingUser)->create();
         $newUser = User::factory()->create();
 
-        $content = $this->handle([
+        $this->assertTrue($this->handle([
             'asset_tag' => $asset->asset_tag,
             'checkout_to_type' => 'user',
             'assigned_user' => $newUser->id,
-        ])->getStructuredContent();
+        ])->responses()->first()->isError());
 
-        $this->assertTrue($content['error']);
         $this->assertDatabaseHas('assets', [
             'id' => $asset->id,
             'assigned_to' => $existingUser->id,
@@ -128,26 +125,22 @@ class CheckoutAssetToolTest extends TestCase
     {
         $asset = Asset::factory()->create();
 
-        $content = $this->handle([
+        $this->assertTrue($this->handle([
             'asset_tag' => $asset->asset_tag,
             'checkout_to_type' => 'user',
             'assigned_user' => 99999,
-        ])->getStructuredContent();
-
-        $this->assertTrue($content['error']);
+        ])->responses()->first()->isError());
     }
 
     public function test_returns_error_when_target_location_not_found()
     {
         $asset = Asset::factory()->create();
 
-        $content = $this->handle([
+        $this->assertTrue($this->handle([
             'asset_tag' => $asset->asset_tag,
             'checkout_to_type' => 'location',
             'assigned_location' => 99999,
-        ])->getStructuredContent();
-
-        $this->assertTrue($content['error']);
+        ])->responses()->first()->isError());
     }
 
     public function test_response_includes_asset_tag_and_target_info()

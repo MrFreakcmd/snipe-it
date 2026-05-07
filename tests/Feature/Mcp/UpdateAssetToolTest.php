@@ -30,7 +30,7 @@ class UpdateAssetToolTest extends TestCase
 
         $content = $this->handle([
             'asset_tag' => $asset->asset_tag,
-            'name'      => 'New Name',
+            'name' => 'New Name',
         ])->getStructuredContent();
 
         $this->assertTrue($content['success']);
@@ -42,7 +42,7 @@ class UpdateAssetToolTest extends TestCase
         $asset = Asset::factory()->create(['name' => 'Old Name']);
 
         $content = $this->handle([
-            'id'   => $asset->id,
+            'id' => $asset->id,
             'name' => 'Updated by ID',
         ])->getStructuredContent();
 
@@ -56,7 +56,7 @@ class UpdateAssetToolTest extends TestCase
 
         $content = $this->handle([
             'serial' => 'SN-UPDATE-001',
-            'name'   => 'Updated by Serial',
+            'name' => 'Updated by Serial',
         ])->getStructuredContent();
 
         $this->assertTrue($content['success']);
@@ -65,22 +65,22 @@ class UpdateAssetToolTest extends TestCase
 
     public function test_updates_multiple_fields_at_once()
     {
-        $asset    = Asset::factory()->create();
+        $asset = Asset::factory()->create();
         $location = Location::factory()->create();
-        $status   = Statuslabel::factory()->rtd()->create();
+        $status = Statuslabel::factory()->rtd()->create();
 
         $this->handle([
-            'asset_tag'   => $asset->asset_tag,
-            'notes'       => 'MCP note',
+            'asset_tag' => $asset->asset_tag,
+            'notes' => 'MCP note',
             'location_id' => $location->id,
-            'status_id'   => $status->id,
+            'status_id' => $status->id,
         ]);
 
         $this->assertDatabaseHas('assets', [
-            'id'          => $asset->id,
-            'notes'       => 'MCP note',
+            'id' => $asset->id,
+            'notes' => 'MCP note',
             'location_id' => $location->id,
-            'status_id'   => $status->id,
+            'status_id' => $status->id,
         ]);
     }
 
@@ -89,7 +89,7 @@ class UpdateAssetToolTest extends TestCase
         $asset = Asset::factory()->create(['asset_tag' => 'TAG-OLD-001']);
 
         $content = $this->handle([
-            'asset_tag'     => 'TAG-OLD-001',
+            'asset_tag' => 'TAG-OLD-001',
             'new_asset_tag' => 'TAG-NEW-001',
         ])->getStructuredContent();
 
@@ -103,7 +103,7 @@ class UpdateAssetToolTest extends TestCase
         $asset = Asset::factory()->create(['serial' => 'SN-OLD-001']);
 
         $this->handle([
-            'asset_tag'  => $asset->asset_tag,
+            'asset_tag' => $asset->asset_tag,
             'new_serial' => 'SN-NEW-001',
         ]);
 
@@ -112,12 +112,10 @@ class UpdateAssetToolTest extends TestCase
 
     public function test_returns_error_when_asset_not_found()
     {
-        $content = $this->handle([
+        $this->assertTrue($this->handle([
             'asset_tag' => 'DOES-NOT-EXIST',
-            'name'      => 'Anything',
-        ])->getStructuredContent();
-
-        $this->assertTrue($content['error']);
+            'name' => 'Anything',
+        ])->responses()->first()->isError());
     }
 
     public function test_response_includes_asset_tag_and_id()
@@ -126,7 +124,7 @@ class UpdateAssetToolTest extends TestCase
 
         $content = $this->handle([
             'asset_tag' => $asset->asset_tag,
-            'name'      => 'Response Check',
+            'name' => 'Response Check',
         ])->getStructuredContent();
 
         $this->assertEquals($asset->asset_tag, $content['asset_tag']);

@@ -53,18 +53,14 @@ class CheckinAssetToolTest extends TestCase
 
     public function test_returns_error_when_asset_tag_not_found()
     {
-        $content = $this->handle(['asset_tag' => 'DOES-NOT-EXIST'])->getStructuredContent();
-
-        $this->assertTrue($content['error']);
+        $this->assertTrue($this->handle(['asset_tag' => 'DOES-NOT-EXIST'])->responses()->first()->isError());
     }
 
     public function test_returns_error_when_asset_not_checked_out()
     {
         $asset = Asset::factory()->create();
 
-        $content = $this->handle(['asset_tag' => $asset->asset_tag])->getStructuredContent();
-
-        $this->assertTrue($content['error']);
+        $this->assertTrue($this->handle(['asset_tag' => $asset->asset_tag])->responses()->first()->isError());
     }
 
     public function test_asset_location_resets_to_rtd_location_on_checkin()
