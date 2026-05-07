@@ -2,10 +2,13 @@
 
 namespace App\Mcp\Servers;
 
+use App\Mcp\Tools\AuditAssetTool;
 use App\Mcp\Tools\CheckinAssetTool;
 use App\Mcp\Tools\CheckoutAssetTool;
+use App\Mcp\Tools\DeleteAssetTool;
 use App\Mcp\Tools\ListAssetsTool;
 use App\Mcp\Tools\ShowAssetTool;
+use App\Mcp\Tools\UpdateAssetTool;
 use Laravel\Mcp\Server;
 use Laravel\Mcp\Server\Attributes\Instructions;
 use Laravel\Mcp\Server\Attributes\Name;
@@ -21,6 +24,9 @@ class SnipeMCPServer extends Server
         ListAssetsTool::class,
         CheckoutAssetTool::class,
         CheckinAssetTool::class,
+        UpdateAssetTool::class,
+        DeleteAssetTool::class,
+        AuditAssetTool::class,
     ];
 
     protected array $resources = [
