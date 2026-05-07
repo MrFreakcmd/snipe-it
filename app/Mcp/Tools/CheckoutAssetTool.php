@@ -36,20 +36,11 @@ class CheckoutAssetTool extends Tool
         $asset = $this->resolveAsset($request);
 
         if (! $asset) {
-            return Response::make(
-                Response::text('Asset not found')
-            )->withStructuredContent(['error' => true, 'message' => 'Asset not found']);
+            return Response::make(Response::error('Asset not found'));
         }
 
         if (! $asset->availableForCheckout()) {
-            return Response::make(
-                Response::text('Asset is not available for checkout')
-            )->withStructuredContent([
-                'error' => true,
-                'message' => 'Asset '.$asset->asset_tag.' is not available for checkout',
-                'asset_tag' => $asset->asset_tag,
-                'status' => $asset->status?->name,
-            ]);
+            return Response::make(Response::error('Asset '.$asset->asset_tag.' is not available for checkout'));
         }
 
         $checkoutType = $request->get('checkout_to_type');
@@ -73,12 +64,7 @@ class CheckoutAssetTool extends Tool
         }
 
         if (! $target) {
-            return Response::make(
-                Response::text('Checkout target not found')
-            )->withStructuredContent([
-                'error' => true,
-                'message' => 'The specified '.$checkoutType.' was not found',
-            ]);
+            return Response::make(Response::error('The specified '.$checkoutType.' was not found'));
         }
 
         $checkoutAt = $request->filled('checkout_at') ? $request->get('checkout_at') : date('Y-m-d H:i:s');
@@ -97,13 +83,7 @@ class CheckoutAssetTool extends Tool
             ]);
         }
 
-        return Response::make(
-            Response::text('Checkout failed')
-        )->withStructuredContent([
-            'error' => true,
-            'message' => 'Checkout failed',
-            'asset_tag' => $asset->asset_tag,
-        ]);
+        return Response::make(Response::error('Checkout failed'));
     }
 
     private function resolveAsset(Request $request): ?Asset

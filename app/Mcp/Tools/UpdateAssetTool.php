@@ -46,9 +46,7 @@ class UpdateAssetTool extends Tool
         $asset = $this->resolveAsset($request);
 
         if (! $asset) {
-            return Response::make(
-                Response::text('Asset not found')
-            )->withStructuredContent(['error' => true, 'message' => 'Asset not found']);
+            return Response::make(Response::error('Asset not found'));
         }
 
         $updatable = [
@@ -84,13 +82,7 @@ class UpdateAssetTool extends Tool
             ]);
         }
 
-        return Response::make(
-            Response::text('Update failed')
-        )->withStructuredContent([
-            'error' => true,
-            'message' => 'Update failed: '.$asset->getErrors()->first(),
-            'asset_tag' => $asset->asset_tag,
-        ]);
+        return Response::make(Response::error('Update failed: '.$asset->getErrors()->first()));
     }
 
     private function resolveAsset(Request $request): ?Asset

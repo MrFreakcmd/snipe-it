@@ -29,21 +29,13 @@ class CheckinAssetTool extends Tool
         $asset = $this->resolveAsset($request);
 
         if (! $asset) {
-            return Response::make(
-                Response::text('Asset not found')
-            )->withStructuredContent(['error' => true, 'message' => 'Asset not found']);
+            return Response::make(Response::error('Asset not found'));
         }
 
         $target = $asset->assignedTo;
 
         if (is_null($target)) {
-            return Response::make(
-                Response::text('Asset is not currently checked out')
-            )->withStructuredContent([
-                'error' => true,
-                'message' => 'Asset '.$asset->asset_tag.' is not currently checked out',
-                'asset_tag' => $asset->asset_tag,
-            ]);
+            return Response::make(Response::error('Asset '.$asset->asset_tag.' is not currently checked out'));
         }
 
         $originalValues = $asset->getRawOriginal();
@@ -69,13 +61,7 @@ class CheckinAssetTool extends Tool
             ]);
         }
 
-        return Response::make(
-            Response::text('Checkin failed')
-        )->withStructuredContent([
-            'error' => true,
-            'message' => 'Checkin failed: '.$asset->getErrors()->first(),
-            'asset_tag' => $asset->asset_tag,
-        ]);
+        return Response::make(Response::error('Checkin failed: '.$asset->getErrors()->first()));
     }
 
     private function resolveAsset(Request $request): ?Asset
