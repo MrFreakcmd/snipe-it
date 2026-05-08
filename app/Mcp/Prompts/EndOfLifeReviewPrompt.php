@@ -7,13 +7,13 @@ use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Attributes\Name;
 use Laravel\Mcp\Server\Attributes\Title;
-use Laravel\Mcp\Server\Prompt;
+use App\Mcp\Prompts\SnipePrompt;
 use Laravel\Mcp\Server\Prompts\Argument;
 
 #[Name('end_of_life_review')]
 #[Title('End of Life Review')]
 #[Description('Identify assets that have passed their EOL date or are fully depreciated, and recommend disposition actions')]
-class EndOfLifeReviewPrompt extends Prompt
+class EndOfLifeReviewPrompt extends SnipePrompt
 {
     public function handle(Request $request): Response
     {
@@ -42,7 +42,7 @@ class EndOfLifeReviewPrompt extends Prompt
         6. Provide a cost summary if purchase cost data is available — total value of end-of-life assets.
         TEXT;
 
-        return Response::text(trim($prompt));
+        return Response::text(trim($prompt).$this->localeInstruction());
     }
 
     public function arguments(): array
