@@ -21,14 +21,14 @@ class UpdateProfileTool extends Tool
     public function handle(Request $request): ResponseFactory
     {
         $request->validate([
-            'first_name'      => 'nullable|string|max:255',
-            'last_name'       => 'nullable|string|max:255',
-            'phone'           => 'nullable|string|max:35',
-            'website'         => 'nullable|url|max:255',
-            'gravatar'        => 'nullable|string|max:255',
-            'locale'          => 'nullable|string|max:10',
-            'two_factor_optin'=> 'nullable|boolean',
-            'location_id'     => 'nullable|integer|exists:locations,id',
+            'first_name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:35',
+            'website' => 'nullable|url|max:255',
+            'gravatar' => 'nullable|string|max:255',
+            'locale' => 'nullable|string|max:10',
+            'two_factor_optin' => 'nullable|boolean',
+            'location_id' => 'nullable|integer|exists:locations,id',
         ]);
 
         $user = auth()->user();
@@ -62,14 +62,14 @@ class UpdateProfileTool extends Tool
             return Response::make(
                 Response::text('Profile updated successfully')
             )->withStructuredContent([
-                'success'    => true,
-                'message'    => 'Profile updated successfully',
+                'success' => true,
+                'message' => 'Profile updated successfully',
                 'first_name' => $user->first_name,
-                'last_name'  => $user->last_name,
-                'phone'      => $user->phone,
-                'website'    => $user->website,
-                'locale'     => $user->locale,
-                'location_id'=> $user->location_id,
+                'last_name' => $user->last_name,
+                'phone' => $user->phone,
+                'website' => $user->website,
+                'locale' => $user->locale,
+                'location_id' => $user->location_id,
             ]);
         }
 
@@ -79,27 +79,27 @@ class UpdateProfileTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'first_name'       => $schema->string()->description('First name'),
-            'last_name'        => $schema->string()->description('Last name'),
-            'phone'            => $schema->string()->description('Phone number'),
-            'website'          => $schema->string()->description('Personal website URL'),
-            'gravatar'         => $schema->string()->description('Gravatar email or hash'),
-            'locale'           => $schema->string()->description('Locale/language code (e.g. en-US)'),
+            'first_name' => $schema->string()->description('First name'),
+            'last_name' => $schema->string()->description('Last name'),
+            'phone' => $schema->string()->description('Phone number'),
+            'website' => $schema->string()->description('Personal website URL'),
+            'gravatar' => $schema->string()->description('Gravatar email or hash'),
+            'locale' => $schema->string()->description('Locale/language code (e.g. en-US)'),
             'two_factor_optin' => $schema->boolean()->description('Opt in to two-factor authentication (requires self.two_factor permission and 2FA enabled in settings)'),
-            'location_id'      => $schema->number()->description('Default location ID (requires self.edit_location permission)'),
+            'location_id' => $schema->number()->description('Default location ID (requires self.edit_location permission)'),
         ];
     }
 
     public function outputSchema(JsonSchema $schema): array
     {
         return [
-            'success'     => $schema->boolean()->description('True if the update succeeded'),
-            'message'     => $schema->string()->description('Human-readable result message')->required(),
-            'first_name'  => $schema->string()->description('Updated first name'),
-            'last_name'   => $schema->string()->description('Updated last name'),
-            'phone'       => $schema->string()->description('Updated phone number'),
-            'website'     => $schema->string()->description('Updated website URL'),
-            'locale'      => $schema->string()->description('Updated locale'),
+            'success' => $schema->boolean()->description('True if the update succeeded'),
+            'message' => $schema->string()->description('Human-readable result message')->required(),
+            'first_name' => $schema->string()->description('Updated first name'),
+            'last_name' => $schema->string()->description('Updated last name'),
+            'phone' => $schema->string()->description('Updated phone number'),
+            'website' => $schema->string()->description('Updated website URL'),
+            'locale' => $schema->string()->description('Updated locale'),
             'location_id' => $schema->number()->description('Updated location ID'),
         ];
     }

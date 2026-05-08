@@ -29,16 +29,16 @@ class UpdateProfileToolTest extends TestCase
     {
         $content = $this->handle([
             'first_name' => 'Updated',
-            'last_name'  => 'Name',
-            'phone'      => '555-1234',
+            'last_name' => 'Name',
+            'phone' => '555-1234',
         ])->getStructuredContent();
 
         $this->assertTrue($content['success']);
         $this->assertDatabaseHas('users', [
-            'id'         => $this->user->id,
+            'id' => $this->user->id,
             'first_name' => 'Updated',
-            'last_name'  => 'Name',
-            'phone'      => '555-1234',
+            'last_name' => 'Name',
+            'phone' => '555-1234',
         ]);
     }
 
@@ -79,9 +79,9 @@ class UpdateProfileToolTest extends TestCase
         $this->handle(['first_name' => 'Changed']);
 
         $this->assertDatabaseHas('users', [
-            'id'         => $this->user->id,
+            'id' => $this->user->id,
             'first_name' => 'Changed',
-            'last_name'  => $originalLastName,
+            'last_name' => $originalLastName,
         ]);
     }
 }
