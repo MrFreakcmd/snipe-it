@@ -3,7 +3,6 @@
 namespace Tests\Feature\Mcp;
 
 use App\Mcp\Tools\CreateDepreciationTool;
-use App\Models\Depreciation;
 use App\Models\User;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\ResponseFactory;

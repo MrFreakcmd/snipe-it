@@ -3,7 +3,6 @@
 namespace Tests\Feature\Mcp;
 
 use App\Mcp\Tools\CreateAssetTool;
-use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Statuslabel;
 use App\Models\User;

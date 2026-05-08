@@ -23,7 +23,7 @@ class CreateGroupToolTest extends TestCase
 
     public function test_creates_group()
     {
-        $name = 'Test MCP Group ' . uniqid();
+        $name = 'Test MCP Group '.uniqid();
 
         $this->handle(['name' => $name]);
 
@@ -32,7 +32,7 @@ class CreateGroupToolTest extends TestCase
 
     public function test_response_includes_id_and_name()
     {
-        $name = 'Test MCP Group ' . uniqid();
+        $name = 'Test MCP Group '.uniqid();
 
         $content = $this->handle(['name' => $name])->getStructuredContent();
 
@@ -51,7 +51,7 @@ class CreateGroupToolTest extends TestCase
     {
         $this->actingAs(User::factory()->create());
 
-        $name = 'Unauthorized Group ' . uniqid();
+        $name = 'Unauthorized Group '.uniqid();
 
         $this->handle(['name' => $name]);
 

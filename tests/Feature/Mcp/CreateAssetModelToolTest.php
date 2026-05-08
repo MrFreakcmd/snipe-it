@@ -3,7 +3,6 @@
 namespace Tests\Feature\Mcp;
 
 use App\Mcp\Tools\CreateAssetModelTool;
-use App\Models\AssetModel;
 use App\Models\Category;
 use App\Models\User;
 use Laravel\Mcp\Request;

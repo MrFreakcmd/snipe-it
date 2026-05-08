@@ -25,7 +25,7 @@ class UpdateGroupToolTest extends TestCase
     public function test_updates_group_by_id()
     {
         $group = Group::factory()->create();
-        $newNotes = 'Updated notes ' . uniqid();
+        $newNotes = 'Updated notes '.uniqid();
 
         $this->handle(['id' => $group->id, 'notes' => $newNotes]);
 
@@ -35,7 +35,7 @@ class UpdateGroupToolTest extends TestCase
     public function test_renames_via_new_name()
     {
         $group = Group::factory()->create();
-        $newName = 'Renamed Group ' . uniqid();
+        $newName = 'Renamed Group '.uniqid();
 
         $this->handle(['id' => $group->id, 'new_name' => $newName]);
 
