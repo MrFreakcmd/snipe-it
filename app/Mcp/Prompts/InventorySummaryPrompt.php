@@ -17,11 +17,11 @@ class InventorySummaryPrompt extends Prompt
 {
     public function handle(Request $request): Response
     {
-        $location   = $request->get('location');
+        $location = $request->get('location');
         $department = $request->get('department');
 
         $scope = collect([
-            $location   ? "location: {$location}"     : null,
+            $location ? "location: {$location}" : null,
             $department ? "department: {$department}" : null,
         ])->filter()->implode(' and ');
 

@@ -17,10 +17,13 @@ class OnboardEmployeePrompt extends Prompt
 {
     public function handle(Request $request): Response
     {
-        $name = $request->get('name');
+        $firstName  = $request->get('first_name');
+        $lastName   = $request->get('last_name');
         $department = $request->get('department');
-        $location = $request->get('location');
-        $title = $request->get('title');
+        $location   = $request->get('location');
+        $title      = $request->get('title');
+
+        $fullName = trim("{$firstName} {$lastName}");
 
         $context = collect([
             $department ? "Department: {$department}" : null,
@@ -29,18 +32,20 @@ class OnboardEmployeePrompt extends Prompt
         ])->filter()->implode("\n");
 
         $prompt = <<<TEXT
-        You are helping onboard a new employee: {$name}.
+        You are helping onboard a new employee.
+
+        Employee details:
+        - First name: {$firstName}
+        - Last name: {$lastName}
         {$context}
 
         Please complete the following onboarding steps using the available tools:
 
-        1. Create a new user account for {$name} with the details provided above.
+        1. Create a new user account using first_name "{$firstName}" and last_name "{$lastName}" along with the details provided above. Ask for any missing required fields (email address, username) before proceeding.
         2. Search for available (undeployed) assets suitable for their role — typically a laptop and any other standard equipment for their department or location.
         3. Check out the selected assets to the new user.
         4. Check whether any software license seats are available that should be assigned (e.g. productivity suites, VPN, etc.) and assign them.
         5. Summarise what was set up: the user account created, assets checked out, and licenses assigned.
-
-        Ask for any missing details (such as email address, username, or specific equipment needs) before proceeding if necessary.
         TEXT;
 
         return Response::text(trim($prompt));
@@ -49,7 +54,8 @@ class OnboardEmployeePrompt extends Prompt
     public function arguments(): array
     {
         return [
-            new Argument('name', 'Full name of the new employee', required: true),
+            new Argument('first_name', 'First name of the new employee', required: true),
+            new Argument('last_name', 'Last name of the new employee', required: false),
             new Argument('department', 'Department the employee will join', required: false),
             new Argument('location', 'Primary office location', required: false),
             new Argument('title', 'Job title', required: false),

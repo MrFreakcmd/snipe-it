@@ -18,11 +18,11 @@ class EndOfLifeReviewPrompt extends Prompt
     public function handle(Request $request): Response
     {
         $department = $request->get('department');
-        $category   = $request->get('category');
+        $category = $request->get('category');
 
         $scope = collect([
             $department ? "department: {$department}" : null,
-            $category   ? "category: {$category}"    : null,
+            $category ? "category: {$category}" : null,
         ])->filter()->implode(' and ');
 
         $scopeLine = $scope

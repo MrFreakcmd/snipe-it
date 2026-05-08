@@ -2,6 +2,16 @@
 
 namespace App\Mcp\Servers;
 
+use App\Mcp\Prompts\AuditLocationPrompt;
+use App\Mcp\Prompts\EndOfLifeReviewPrompt;
+use App\Mcp\Prompts\ExpiringLicensesPrompt;
+use App\Mcp\Prompts\FindAvailableAssetPrompt;
+use App\Mcp\Prompts\InventorySummaryPrompt;
+use App\Mcp\Prompts\OffboardEmployeePrompt;
+use App\Mcp\Prompts\OnboardEmployeePrompt;
+use App\Mcp\Prompts\UserInventoryPrompt;
+use App\Mcp\Prompts\WarrantyExpiringPrompt;
+use App\Mcp\Tools\AddAssetNoteTool;
 use App\Mcp\Tools\AuditAssetTool;
 use App\Mcp\Tools\CheckinAccessoryTool;
 use App\Mcp\Tools\CheckinAssetTool;
@@ -116,6 +126,7 @@ class SnipeMCPServer extends Server
         CheckoutAssetTool::class,
         CheckinAssetTool::class,
         AuditAssetTool::class,
+        AddAssetNoteTool::class,
 
         // Users
         ListUsersTool::class,
@@ -241,6 +252,14 @@ class SnipeMCPServer extends Server
     ];
 
     protected array $prompts = [
-        //
+        OnboardEmployeePrompt::class,
+        OffboardEmployeePrompt::class,
+        AuditLocationPrompt::class,
+        FindAvailableAssetPrompt::class,
+        ExpiringLicensesPrompt::class,
+        EndOfLifeReviewPrompt::class,
+        WarrantyExpiringPrompt::class,
+        InventorySummaryPrompt::class,
+        UserInventoryPrompt::class,
     ];
 }

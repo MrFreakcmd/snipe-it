@@ -18,12 +18,12 @@ class FindAvailableAssetPrompt extends Prompt
     public function handle(Request $request): Response
     {
         $category = $request->get('category');
-        $model    = $request->get('model');
+        $model = $request->get('model');
         $assignTo = $request->get('assign_to');
 
         $assetDescription = collect([
             $category ? "category: {$category}" : null,
-            $model    ? "model: {$model}"       : null,
+            $model ? "model: {$model}" : null,
         ])->filter()->implode(' / ');
 
         $assignLine = $assignTo
