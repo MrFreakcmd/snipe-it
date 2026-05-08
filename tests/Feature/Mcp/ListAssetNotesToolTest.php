@@ -29,11 +29,11 @@ class ListAssetNotesToolTest extends TestCase
         $author = User::factory()->create();
 
         Actionlog::factory()->create([
-            'item_type'   => Asset::class,
-            'item_id'     => $asset->id,
+            'item_type' => Asset::class,
+            'item_id' => $asset->id,
             'action_type' => 'note added',
-            'note'        => 'Test note content',
-            'created_by'  => $author->id,
+            'note' => 'Test note content',
+            'created_by' => $author->id,
         ]);
 
         $content = $this->handle(['id' => $asset->id])->getStructuredContent();

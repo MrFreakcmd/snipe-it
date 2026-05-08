@@ -36,11 +36,11 @@ class UpdateDepartmentTool extends Tool
         $department = $this->resolveDepartment($request);
 
         if (! $department) {
-            return Response::make(Response::error('Department not found'));
+            return Response::make(Response::error(trans('mcp.department_not_found')));
         }
 
         if (! Gate::allows('update', $department)) {
-            return Response::make(Response::error('Unauthorized'));
+            return Response::make(Response::error(trans('mcp.unauthorized')));
         }
 
         $updatable = ['location_id', 'manager_id', 'phone', 'fax', 'notes'];
