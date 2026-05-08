@@ -64,6 +64,8 @@ class AppServiceProvider extends ServiceProvider
             $url->forceScheme('https');
         }
 
+        Passport::enablePasswordGrant();
+
         Passport::authorizationView(function ($parameters) {
             return view('mcp.authorize', $parameters);
         });
