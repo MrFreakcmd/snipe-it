@@ -62,7 +62,7 @@ class CreateSupplierTool extends Tool
             ]);
         }
 
-        return Response::make(Response::error('Create failed: '.$supplier->getErrors()->first()));
+        return Response::make(Response::error(trans('mcp.create_failed', ['error' => $supplier->getErrors()->first()])));
     }
 
     public function schema(JsonSchema $schema): array

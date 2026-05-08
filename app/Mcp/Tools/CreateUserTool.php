@@ -90,7 +90,7 @@ class CreateUserTool extends Tool
             ]);
         }
 
-        return Response::make(Response::error('Create failed: '.$user->getErrors()->first()));
+        return Response::make(Response::error(trans('mcp.create_failed', ['error' => $user->getErrors()->first()])));
     }
 
     public function schema(JsonSchema $schema): array

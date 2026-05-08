@@ -7,7 +7,6 @@ use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Attributes\Name;
 use Laravel\Mcp\Server\Attributes\Title;
-use App\Mcp\Prompts\SnipePrompt;
 use Laravel\Mcp\Server\Prompts\Argument;
 
 #[Name('find_available_asset')]
