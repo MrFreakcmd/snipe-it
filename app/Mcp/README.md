@@ -61,13 +61,11 @@ Claude Desktop will initiate the OAuth flow on first connection. Once authorised
 
 ### MCP Inspector
 
-The [MCP Inspector](https://github.com/modelcontextprotocol/inspector) is useful for exploring and testing tools before integrating with a client:
+The [MCP Inspector](https://laravel.com/docs/12.x/mcp#mcp-inspector) is useful for exploring and testing tools before
+integrating with a client:
 
-1. Run `npx @modelcontextprotocol/inspector`
-2. Set the transport to **Streamable HTTP**
-3. Enter the server URL: `https://your-snipeit-domain.com/mcp/snipe-it`
-4. Click **Connect** and complete the OAuth flow
-5. Browse tools and prompts from the sidebar
+1. Run `php artisan mcp:inspector SnipeITMcpServer` in your terminal
+2. Open the provided URL in your browser
 
 ### Cursor / VS Code / Other MCP Clients
 
