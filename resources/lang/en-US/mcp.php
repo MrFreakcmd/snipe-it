@@ -14,6 +14,7 @@ return [
     // -----------------------------------------------------------------
     // "Not found" errors
     // -----------------------------------------------------------------
+    'object_not_found' => 'The specified :type was not found',
     'asset_not_found' => 'Asset not found',
     'user_not_found' => 'User not found',
     'accessory_not_found' => 'Accessory not found',
@@ -241,5 +242,8 @@ return [
     'list_groups' => 'Found :total groups, returning :count',
     'list_maintenances' => 'Found :total maintenances, returning :count',
     'list_activity' => 'Found :total activity log entries, returning :count',
+    'list_asset_notes' => 'Found :total notes for asset :asset_tag, returning :count',
+    'list_uploads' => 'Found :total uploaded files for :type, returning :count',
+    'list_history' => 'Found :total history entries for :type, returning :count',
 
 ];

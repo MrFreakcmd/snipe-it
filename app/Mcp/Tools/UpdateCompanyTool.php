@@ -33,11 +33,11 @@ class UpdateCompanyTool extends Tool
         $company = $this->resolveCompany($request);
 
         if (! $company) {
-            return Response::make(Response::error('Company not found'));
+            return Response::make(Response::error(trans('mcp.company_not_found')));
         }
 
         if (! Gate::allows('update', $company)) {
-            return Response::make(Response::error('Unauthorized'));
+            return Response::make(Response::error(trans('mcp.unauthorized')));
         }
 
         if ($request->filled('new_name')) {
