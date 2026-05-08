@@ -93,6 +93,7 @@ use App\Mcp\Tools\UpdateLocationTool;
 use App\Mcp\Tools\UpdateManufacturerTool;
 use App\Mcp\Tools\UpdateStatusLabelTool;
 use App\Mcp\Tools\UpdateSupplierTool;
+use App\Mcp\Tools\UpdateProfileTool;
 use App\Mcp\Tools\UpdateUserTool;
 use Laravel\Mcp\Server;
 use Laravel\Mcp\Server\Attributes\Instructions;
@@ -124,6 +125,7 @@ class SnipeMCPServer extends Server
         DeleteUserTool::class,
         RestoreUserTool::class,
         GetCurrentUserTool::class,
+        UpdateProfileTool::class,
         GetUserAssetsTool::class,
         Reset2FATool::class,
 
