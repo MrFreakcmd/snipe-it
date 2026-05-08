@@ -17,18 +17,18 @@ class OnboardEmployeePrompt extends Prompt
 {
     public function handle(Request $request): Response
     {
-        $firstName  = $request->get('first_name');
-        $lastName   = $request->get('last_name');
+        $firstName = $request->get('first_name');
+        $lastName = $request->get('last_name');
         $department = $request->get('department');
-        $location   = $request->get('location');
-        $title      = $request->get('title');
+        $location = $request->get('location');
+        $title = $request->get('title');
 
         $fullName = trim("{$firstName} {$lastName}");
 
         $context = collect([
             $department ? "Department: {$department}" : null,
-            $location   ? "Location: {$location}"     : null,
-            $title      ? "Job title: {$title}"       : null,
+            $location ? "Location: {$location}" : null,
+            $title ? "Job title: {$title}" : null,
         ])->filter()->implode("\n");
 
         $prompt = <<<TEXT
