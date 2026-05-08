@@ -28,8 +28,8 @@ class ListHistoryToolTest extends TestCase
         $asset = Asset::factory()->create();
 
         Actionlog::factory()->create([
-            'item_type'   => Asset::class,
-            'item_id'     => $asset->id,
+            'item_type' => Asset::class,
+            'item_id' => $asset->id,
             'action_type' => 'update',
         ]);
 
@@ -55,21 +55,21 @@ class ListHistoryToolTest extends TestCase
         $asset = Asset::factory()->create();
 
         Actionlog::factory()->create([
-            'item_type'   => Asset::class,
-            'item_id'     => $asset->id,
+            'item_type' => Asset::class,
+            'item_id' => $asset->id,
             'action_type' => 'update',
         ]);
 
         Actionlog::factory()->create([
-            'item_type'   => Asset::class,
-            'item_id'     => $asset->id,
+            'item_type' => Asset::class,
+            'item_id' => $asset->id,
             'action_type' => 'note added',
-            'note'        => 'A note',
+            'note' => 'A note',
         ]);
 
         $content = $this->handle([
             'object_type' => 'asset',
-            'id'          => $asset->id,
+            'id' => $asset->id,
             'action_type' => 'note added',
         ])->getStructuredContent();
 

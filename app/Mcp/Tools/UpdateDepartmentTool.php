@@ -61,16 +61,16 @@ class UpdateDepartmentTool extends Tool
 
         if ($department->save()) {
             return Response::make(
-                Response::text('Department '.$department->name.' updated successfully')
+                Response::text(trans('mcp.department_updated', ['name' => $department->name]))
             )->withStructuredContent([
                 'success' => true,
-                'message' => 'Department updated successfully',
+                'message' => trans('mcp.department_updated', ['name' => $department->name]),
                 'id' => $department->id,
                 'name' => $department->name,
             ]);
         }
 
-        return Response::make(Response::error('Update failed: '.$department->getErrors()->first()));
+        return Response::make(Response::error(trans('mcp.update_failed', ['error' => $department->getErrors()->first()])));
     }
 
     private function resolveDepartment(Request $request): ?Department

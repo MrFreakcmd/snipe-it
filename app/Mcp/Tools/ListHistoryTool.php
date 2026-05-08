@@ -3,6 +3,7 @@
 namespace App\Mcp\Tools;
 
 use App\Models\Accessory;
+use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Component;
@@ -67,17 +68,28 @@ class ListHistoryTool extends Tool
         $limit = $request->filled('limit') ? (int) $request->get('limit') : 25;
         $offset = $request->filled('offset') ? (int) $request->get('offset') : 0;
 
-        $history = $object->history();
+        $modelClass = get_class($object);
+        $modelId = $object->getKey();
+
+        // Wrap the item/target OR in a subquery so additional filters apply to both sides.
+        $history = Actionlog::where(function ($q) use ($modelClass, $modelId) {
+            $q->where('item_type', $modelClass)
+                ->where('item_id', $modelId)
+                ->orWhere(function ($q2) use ($modelClass, $modelId) {
+                    $q2->where('target_type', $modelClass)
+                        ->where('target_id', $modelId);
+                });
+        });
 
         if ($request->filled('search')) {
-            $history = $history->TextSearch(e($request->get('search')));
+            $history->TextSearch(e($request->get('search')));
         }
 
         if ($request->filled('action_type')) {
-            $history = $history->where('action_type', $request->get('action_type'));
+            $history->where('action_type', $request->get('action_type'));
         }
 
-        $history = $history->orderBy('action_logs.created_at', 'desc');
+        $history->orderBy('action_logs.created_at', 'desc');
 
         $total = (clone $history)->count();
         $records = $history->skip($offset)->take($limit)->forApiHistory()->get();

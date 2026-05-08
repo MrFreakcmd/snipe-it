@@ -28,10 +28,10 @@ class ListUploadsToolTest extends TestCase
         $asset = Asset::factory()->create();
 
         Actionlog::factory()->create([
-            'item_type'   => Asset::class,
-            'item_id'     => $asset->id,
+            'item_type' => Asset::class,
+            'item_id' => $asset->id,
             'action_type' => 'uploaded',
-            'filename'    => 'test-document.pdf',
+            'filename' => 'test-document.pdf',
         ]);
 
         $content = $this->handle(['object_type' => 'assets', 'id' => $asset->id])->getStructuredContent();
