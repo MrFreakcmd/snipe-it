@@ -117,7 +117,7 @@ class UpdateUserTool extends Tool
             ]);
         }
 
-        return Response::make(Response::error('Update failed: '.$user->getErrors()->first()));
+        return Response::make(Response::error(trans('mcp.update_failed', ['error' => $user->getErrors()->first()])));
     }
 
     private function resolveUser(Request $request): ?User
