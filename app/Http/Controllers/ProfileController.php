@@ -63,6 +63,7 @@ class ProfileController extends Controller
 
         $user->enable_sounds = $request->input('enable_sounds', false);
         $user->enable_confetti = $request->input('enable_confetti', false);
+        $user->accessible_font = $request->input('accessible_font') ?: null;
         $user->link_light_color = $request->input('link_light_color', '#296282');
         $user->link_dark_color = $request->input('link_dark_color', '#296282');
         $user->nav_link_color = $request->input('nav_link_color', '#FFFFFF');

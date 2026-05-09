@@ -1154,6 +1154,26 @@
     <script src="{{ url(asset('js/html5shiv.js')) }}" nonce="{{ csrf_token() }}"></script>
     <script src="{{ url(asset('js/respond.js')) }}" nonce="{{ csrf_token() }}"></script>
 
+    @auth
+        @if(auth()->user()->accessible_font === 'opendyslexic')
+            <link rel="stylesheet" href="{{ asset('css/fonts/opendyslexic/opendyslexic.css') }}">
+            <style nonce="{{ csrf_token() }}">
+               
+
+                body, body * {
+                    font-family: 'OpenDyslexic', sans-serif !important;
+                }
+
+                .fa, .fa-classic, .fas, .fa-solid, .far, .fa-regular {
+                    font-family: "Font Awesome 6 Free" !important;
+                }
+
+                .fa-brands, .fab {
+                    font-family: "Font Awesome 6 Brands" !important;
+                }
+            </style>
+        @endif
+    @endauth
 
 </head>
 

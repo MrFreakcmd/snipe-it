@@ -37,6 +37,18 @@
                   </div>
               </div>
 
+              <!-- Accessible Font -->
+              <div class="form-group {{ $errors->has('accessible_font') ? 'has-error' : '' }}">
+                  <label class="col-md-3 control-label" for="accessible_font">{{ trans('general.accessible_font') }}</label>
+                  <div class="col-md-6">
+                      <select name="accessible_font" id="accessible_font" class="select2" style="width: 100%">
+                          <option value="">{{ trans('general.system_default') }}</option>
+                          <option value="opendyslexic" {{ old('accessible_font', $user->accessible_font) === 'opendyslexic' ? 'selected' : '' }}>OpenDyslexic</option>
+                      </select>
+                      {!! $errors->first('accessible_font', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                  </div>
+              </div>
+
               <!-- Nav Link color -->
               <div class="form-group {{ $errors->has('nav_link_color') ? 'error' : '' }}">
                   <label for="nav_link_color" class="col-md-3 control-label">{{ trans('admin/settings/general.nav_link_color') }}</label>

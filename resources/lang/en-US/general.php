@@ -3,6 +3,7 @@
 return [
     'show_all' => 'Show All',
     '2FA_reset' => '2FA reset',
+    'accessible_font' => 'Accessible Font',
     'accessories' => 'Accessories',
     'activated' => 'Activated',
     'login_status' => 'Login Status',
