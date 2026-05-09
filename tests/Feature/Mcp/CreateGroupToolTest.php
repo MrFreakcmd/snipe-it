@@ -57,4 +57,52 @@ class CreateGroupToolTest extends TestCase
 
         $this->assertDatabaseMissing('permission_groups', ['name' => $name]);
     }
+
+    public function test_creates_group_with_valid_permissions()
+    {
+        $name = 'Permissions Group '.uniqid();
+
+        $content = $this->handle([
+            'name' => $name,
+            'permissions' => json_encode(['assets.view' => 1, 'assets.create' => -1]),
+        ])->getStructuredContent();
+
+        $this->assertTrue($content['success']);
+        $this->assertArrayHasKey('permissions', $content);
+        $group = \App\Models\Group::where('name', $name)->first();
+        $this->assertNotNull($group);
+        $decoded = json_decode($group->permissions, true);
+        $this->assertEquals(1, $decoded['assets.view']);
+        $this->assertEquals(-1, $decoded['assets.create']);
+    }
+
+    public function test_returns_error_for_invalid_permission_key()
+    {
+        $response = $this->handle([
+            'name' => 'Bad Perms Group '.uniqid(),
+            'permissions' => json_encode(['not.a.real.key' => 1]),
+        ]);
+
+        $this->assertTrue($response->responses()->first()->isError());
+    }
+
+    public function test_returns_error_for_invalid_permission_value()
+    {
+        $response = $this->handle([
+            'name' => 'Bad Value Group '.uniqid(),
+            'permissions' => json_encode(['assets.view' => 0]),
+        ]);
+
+        $this->assertTrue($response->responses()->first()->isError());
+    }
+
+    public function test_returns_error_for_malformed_permissions_json()
+    {
+        $response = $this->handle([
+            'name' => 'Malformed Group '.uniqid(),
+            'permissions' => 'not valid json',
+        ]);
+
+        $this->assertTrue($response->responses()->first()->isError());
+    }
 }
