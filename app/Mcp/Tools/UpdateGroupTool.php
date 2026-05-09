@@ -27,11 +27,11 @@ class UpdateGroupTool extends Tool
 
         try {
             $request->validate([
-                'id'          => 'nullable|integer',
-                'name'        => 'nullable|string|max:255',
-                'new_name'    => 'nullable|string|max:255',
+                'id' => 'nullable|integer',
+                'name' => 'nullable|string|max:255',
+                'new_name' => 'nullable|string|max:255',
                 'permissions' => 'nullable|string',
-                'notes'       => 'nullable|string',
+                'notes' => 'nullable|string',
             ]);
         } catch (ValidationException $e) {
             return Response::make(Response::error($e->validator->errors()->first()));
@@ -69,10 +69,10 @@ class UpdateGroupTool extends Tool
             return Response::make(
                 Response::text(trans('mcp.group_updated', ['name' => $group->name]))
             )->withStructuredContent([
-                'success'     => true,
-                'message'     => trans('mcp.group_updated', ['name' => $group->name]),
-                'id'          => $group->id,
-                'name'        => $group->name,
+                'success' => true,
+                'message' => trans('mcp.group_updated', ['name' => $group->name]),
+                'id' => $group->id,
+                'name' => $group->name,
                 'permissions' => $group->decodePermissions(),
             ]);
         }
@@ -112,26 +112,26 @@ class UpdateGroupTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'id'          => $schema->number()->description('Numeric group ID to update'),
-            'name'        => $schema->string()->description('Group name to look up for updating'),
-            'new_name'    => $schema->string()->description('New name to rename the group to'),
+            'id' => $schema->number()->description('Numeric group ID to update'),
+            'name' => $schema->string()->description('Group name to look up for updating'),
+            'new_name' => $schema->string()->description('New name to rename the group to'),
             'permissions' => $schema->string()->description(
                 'JSON object replacing the group\'s entire permission set. '.
                 'Map permission keys to 1 (grant) or -1 (deny). '.
                 'Example: {"assets.view":1,"assets.create":1,"assets.edit":-1}. '.
                 'Omit to leave existing permissions unchanged.'
             ),
-            'notes'       => $schema->string()->description('Updated notes for the group'),
+            'notes' => $schema->string()->description('Updated notes for the group'),
         ];
     }
 
     public function outputSchema(JsonSchema $schema): array
     {
         return [
-            'success'     => $schema->boolean()->description('True if the update succeeded'),
-            'message'     => $schema->string()->description('Human-readable result message')->required(),
-            'id'          => $schema->number()->description('Numeric ID of the updated group'),
-            'name'        => $schema->string()->description('Name of the updated group'),
+            'success' => $schema->boolean()->description('True if the update succeeded'),
+            'message' => $schema->string()->description('Human-readable result message')->required(),
+            'id' => $schema->number()->description('Numeric ID of the updated group'),
+            'name' => $schema->string()->description('Name of the updated group'),
             'permissions' => $schema->object()->description('Permissions now set on the group'),
         ];
     }

@@ -3,6 +3,7 @@
 namespace Tests\Feature\Mcp;
 
 use App\Mcp\Tools\CreateGroupTool;
+use App\Models\Group;
 use App\Models\User;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\ResponseFactory;
@@ -69,7 +70,7 @@ class CreateGroupToolTest extends TestCase
 
         $this->assertTrue($content['success']);
         $this->assertArrayHasKey('permissions', $content);
-        $group = \App\Models\Group::where('name', $name)->first();
+        $group = Group::where('name', $name)->first();
         $this->assertNotNull($group);
         $decoded = json_decode($group->permissions, true);
         $this->assertEquals(1, $decoded['assets.view']);

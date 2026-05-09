@@ -27,9 +27,9 @@ class CreateGroupTool extends Tool
 
         try {
             $request->validate([
-                'name'        => 'required|string|max:255',
+                'name' => 'required|string|max:255',
                 'permissions' => 'nullable|string',
-                'notes'       => 'nullable|string',
+                'notes' => 'nullable|string',
             ]);
         } catch (ValidationException $e) {
             return Response::make(Response::error($e->validator->errors()->first()));
@@ -58,10 +58,10 @@ class CreateGroupTool extends Tool
             return Response::make(
                 Response::text(trans('mcp.group_created', ['name' => $group->name]))
             )->withStructuredContent([
-                'success'     => true,
-                'message'     => trans('mcp.group_created', ['name' => $group->name]),
-                'id'          => $group->id,
-                'name'        => $group->name,
+                'success' => true,
+                'message' => trans('mcp.group_created', ['name' => $group->name]),
+                'id' => $group->id,
+                'name' => $group->name,
                 'permissions' => $group->decodePermissions(),
             ]);
         }
@@ -101,7 +101,7 @@ class CreateGroupTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'name'        => $schema->string()->description('Group name (required, must be unique)'),
+            'name' => $schema->string()->description('Group name (required, must be unique)'),
             'permissions' => $schema->string()->description(
                 'JSON object mapping permission keys to 1 (grant) or -1 (deny). '.
                 'Valid keys include: superuser, admin, import, reports.view, '.
@@ -113,17 +113,17 @@ class CreateGroupTool extends Tool
                 'consumables.view, consumables.create, consumables.edit, consumables.delete, consumables.checkout, '.
                 'and many more. Example: {"assets.view":1,"assets.create":1,"assets.edit":-1}'
             ),
-            'notes'       => $schema->string()->description('Notes about the group'),
+            'notes' => $schema->string()->description('Notes about the group'),
         ];
     }
 
     public function outputSchema(JsonSchema $schema): array
     {
         return [
-            'success'     => $schema->boolean()->description('True if the group was created'),
-            'message'     => $schema->string()->description('Human-readable result message')->required(),
-            'id'          => $schema->number()->description('Numeric ID of the new group'),
-            'name'        => $schema->string()->description('Name of the new group'),
+            'success' => $schema->boolean()->description('True if the group was created'),
+            'message' => $schema->string()->description('Human-readable result message')->required(),
+            'id' => $schema->number()->description('Numeric ID of the new group'),
+            'name' => $schema->string()->description('Name of the new group'),
             'permissions' => $schema->object()->description('Permissions set on the group'),
         ];
     }

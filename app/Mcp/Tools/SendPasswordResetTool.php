@@ -22,9 +22,9 @@ class SendPasswordResetTool extends Tool
     public function handle(Request $request): ResponseFactory
     {
         $request->validate([
-            'id'       => 'nullable|integer',
+            'id' => 'nullable|integer',
             'username' => 'nullable|string|max:191',
-            'email'    => 'nullable|string|max:191',
+            'email' => 'nullable|string|max:191',
         ]);
 
         $user = $this->resolveUser($request);
@@ -59,10 +59,10 @@ class SendPasswordResetTool extends Tool
             return Response::make(
                 Response::text(trans('mcp.password_reset_sent', ['email' => $user->email]))
             )->withStructuredContent([
-                'success'  => true,
-                'message'  => trans('mcp.password_reset_sent', ['email' => $user->email]),
+                'success' => true,
+                'message' => trans('mcp.password_reset_sent', ['email' => $user->email]),
                 'username' => $user->username,
-                'email'    => $user->email,
+                'email' => $user->email,
             ]);
         }
 
@@ -87,19 +87,19 @@ class SendPasswordResetTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'id'       => $schema->number()->description('Numeric ID of the user'),
+            'id' => $schema->number()->description('Numeric ID of the user'),
             'username' => $schema->string()->description('Username of the user'),
-            'email'    => $schema->string()->description('Email address of the user'),
+            'email' => $schema->string()->description('Email address of the user'),
         ];
     }
 
     public function outputSchema(JsonSchema $schema): array
     {
         return [
-            'success'  => $schema->boolean()->description('True if the reset email was sent'),
-            'message'  => $schema->string()->description('Human-readable result message')->required(),
+            'success' => $schema->boolean()->description('True if the reset email was sent'),
+            'message' => $schema->string()->description('Human-readable result message')->required(),
             'username' => $schema->string()->description('Username of the user'),
-            'email'    => $schema->string()->description('Email address the reset link was sent to'),
+            'email' => $schema->string()->description('Email address the reset link was sent to'),
         ];
     }
 }
