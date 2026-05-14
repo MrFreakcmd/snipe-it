@@ -179,6 +179,22 @@ class AssetCheckinTest extends TestCase
         $this->assertHasTheseActionLogs($asset, ['create', 'checkin from']);
     }
 
+    public function test_location_is_nulled_when_empty_location_id_submitted_on_checkin()
+    {
+        $rtdLocation = Location::factory()->create();
+        $asset = Asset::factory()->assignedToUser()->create([
+            'location_id' => Location::factory()->create()->id,
+            'rtd_location_id' => $rtdLocation->id,
+        ]);
+
+        $this->actingAs(User::factory()->checkinAssets()->create())
+            ->post(route('hardware.checkin.store', [$asset]), [
+                'location_id' => '',
+            ]);
+
+        $this->assertNull($asset->refresh()->location_id);
+    }
+
     public function test_default_location_can_be_updated_upon_checkin()
     {
         $location = Location::factory()->create();
