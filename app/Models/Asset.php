@@ -8,6 +8,7 @@ use App\Helpers\Helper;
 use App\Http\Traits\UniqueUndeletedTrait;
 use App\Models\Traits\Acceptable;
 use App\Models\Traits\CompanyableTrait;
+use App\Models\Traits\HasCustomFields;
 use App\Models\Traits\HasUploads;
 use App\Models\Traits\Loggable;
 use App\Models\Traits\Requestable;
@@ -20,7 +21,6 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Watson\Validating\ValidatingTrait;
@@ -37,6 +37,7 @@ class Asset extends Depreciable
     protected $with = ['model', 'adminuser', 'location', 'company'];
 
     use CompanyableTrait;
+    use HasCustomFields;
     use HasFactory;
     use HasUploads;
     use Loggable;
@@ -252,41 +253,9 @@ class Asset extends Depreciable
         $this->attributes['expected_checkin'] = $value;
     }
 
-    public function customFieldValidationRules()
+    protected function getCustomFieldset(): ?CustomFieldset
     {
-
-        $customFieldValidationRules = [];
-
-        if (($this->model) && ($this->model->fieldset)) {
-
-            foreach ($this->model->fieldset->fields as $field) {
-
-                // this just casts booleans that may come through as strings to an actual boolean type
-                // adding !$field->field_encrypted because when the encrypted value comes through it
-                // screws things up for the encrypted validation rules (and the encrypted string
-                // is not a valid boolean type)
-                if ($field->format == 'BOOLEAN' && ! $field->field_encrypted) {
-                    $this->{$field->db_column} = filter_var($this->{$field->db_column}, FILTER_VALIDATE_BOOLEAN);
-                }
-            }
-
-            $customFieldValidationRules += $this->model->fieldset->validation_rules();
-        }
-
-        return $customFieldValidationRules;
-
-    }
-
-    /**
-     * This handles the custom field validation for assets
-     *
-     * @var array
-     */
-    public function save(array $params = [])
-    {
-        $this->rules += $this->customFieldValidationRules();
-
-        return parent::save($params);
+        return $this->model?->fieldset ?? null;
     }
 
     public function getDisplayNameAttribute()
@@ -606,40 +575,6 @@ class Asset extends Depreciable
     public function validationRules()
     {
         return $this->rules;
-    }
-
-    public function customFieldsForCheckinCheckout($checkin_checkout)
-    {
-        // Check to see if any of the custom fields were included on the form and if they have any values
-        if (($this->model) && ($this->model->fieldset) && ($this->model->fieldset->fields)) {
-
-            foreach ($this->model->fieldset->fields as $field) {
-
-                if (($field->{$checkin_checkout} == 1) && (request()->has($field->db_column))) {
-
-                    if ($field->field_encrypted == '1') {
-
-                        if (Gate::allows('assets.view.encrypted_custom_fields')) {
-                            if (is_array(request()->input($field->db_column))) {
-                                $this->{$field->db_column} = Crypt::encrypt(implode(', ', request()->input($field->db_column)));
-                            } else {
-                                $this->{$field->db_column} = Crypt::encrypt(request()->input($field->db_column));
-                            }
-                        }
-
-                    } else {
-
-                        if (is_array(request()->input($field->db_column))) {
-                            $this->{$field->db_column} = implode(', ', request()->input($field->db_column));
-                        } else {
-                            $this->{$field->db_column} = request()->input($field->db_column);
-                        }
-
-                    }
-                }
-            }
-        }
-
     }
 
     public function manufacturer()
