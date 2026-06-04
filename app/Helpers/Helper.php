@@ -1597,7 +1597,7 @@ class Helper
         $checkout_to_type = session('checkout_to_type') ?? null;
         $checkedInFrom = session('checkedInFrom');
         $other_redirect = session('other_redirect');
-        $backUrl = session()->pull('url.intended', 'home');
+        $backUrl = str_replace(["\r", "\n"], '', session()->pull('url.intended', 'home'));
 
         // return to previous page
         if ($redirect_option == 'back') {
